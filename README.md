@@ -90,3 +90,6 @@ password: admin123
 - Добавена е Eventora Club система с точки при покупка.
 - В профила има отделна секция за баланс, ниво и история на точките.
 - В кошницата могат да се използват точки за отстъпка.
+
+## Notes
+The application uses an embedded H2 database for local testing.
