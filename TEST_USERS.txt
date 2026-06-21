@@ -1,0 +1,17 @@
+Тестови профили
+
+USER
+username: ivan
+password: 123456
+
+USER
+username: maria
+password: 123456
+
+VIP
+username: vip
+password: vip123
+
+ADMIN
+username: admin
+password: admin123

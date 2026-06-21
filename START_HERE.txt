@@ -1,0 +1,18 @@
+Eventora - start guide
+
+1. Extract the ZIP file.
+2. Open IntelliJ IDEA.
+3. Choose File -> Open.
+4. Select the main project folder, the one that contains pom.xml and src.
+5. Wait for Maven to finish loading.
+6. Open src/main/java/bg/softuni/eventora/EventoraApplication.java.
+7. Run the main method or run Maven goal: spring-boot:run.
+8. Open http://localhost:8080/visualization
+
+The project uses H2 by default, so MySQL and Docker are not required for local testing.
+
+
+Допълнително:
+- Добавена е Eventora Club система с точки при покупка.
+- В профила има отделна секция за баланс, ниво и история на точките.
+- В кошницата могат да се използват точки за отстъпка.
