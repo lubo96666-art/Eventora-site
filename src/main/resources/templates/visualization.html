@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventora Tickets</title>
+    <style>
+        *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f6fb;color:#151923} a{text-decoration:none;color:inherit}
+        .topbar{background:#071020;color:#fff;position:sticky;top:0;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.22);border-bottom:1px solid rgba(255,255,255,.08)}
+        .nav{max-width:1220px;margin:auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center;padding:14px 22px;gap:26px;min-height:76px}
+        .logo{font-weight:950;font-size:28px;letter-spacing:-1px;white-space:nowrap}.logo span{color:#00d084}.links{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800}.links a{opacity:.88;padding:10px 14px;border-radius:999px}.links a:hover{opacity:1;color:#00d084;background:rgba(255,255,255,.07)}
+        .auth{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:270px}.auth form{margin:0}.user-menu{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:7px}.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:900;cursor:pointer;transition:.2s;background:#e9eef8;color:#121827;white-space:nowrap;font-size:15px;line-height:1}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.12)}.btn.primary{background:#00d084;color:#06120c}.btn.dark{background:#141b32;color:#fff}.btn.danger{background:#ffe8ec;color:#bc1230}.btn.outline{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.38)}
+        .hello{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:13px;background:#172033;font-weight:900;white-space:nowrap}.hello:before{content:'👤'}.hero{background:linear-gradient(135deg,#111936 0%,#243c7a 55%,#00a86b 100%);color:#fff}.hero-inner{max-width:1180px;margin:auto;padding:64px 22px;display:grid;grid-template-columns:1.25fr .75fr;gap:34px;align-items:center}.hero h1{font-size:50px;line-height:1.02;margin:0 0 16px;letter-spacing:-2px}.hero p{font-size:18px;opacity:.9;max-width:650px}.searchbox{background:#fff;color:#111;border-radius:22px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.22)}.searchbox label{font-size:13px;font-weight:900;color:#5f6877}.searchbox input,.searchbox select{width:100%;padding:13px;border:1px solid #dce2ee;border-radius:12px;margin:6px 0 12px;font-size:15px}.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);padding:9px 12px;border-radius:999px;font-weight:700}.quick-cats{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 24px}.quick-cats button{border:1px solid #dde4f0;background:#fff;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer;color:#202a3d}.quick-cats button:hover{border-color:#00d084;color:#007a4d}.event-count{background:#ecfff6;color:#087645;border-radius:999px;padding:8px 12px;font-weight:900;white-space:nowrap}
+        .wrap{max-width:1180px;margin:auto;padding:36px 22px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:20px}.section-head h2{font-size:32px;margin:0;letter-spacing:-1px}.muted{color:#687285}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.card{background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 10px 30px rgba(13,23,48,.08);border:1px solid #e6eaf2;display:grid;grid-template-columns:185px 1fr}.poster{min-height:235px;background:linear-gradient(135deg,#101832,#334da4);color:#fff;padding:20px;display:flex;flex-direction:column;justify-content:space-between}.poster .cat{background:rgba(255,255,255,.18);width:max-content;padding:8px 11px;border-radius:999px;font-weight:900}.poster .day{font-size:44px;font-weight:900;line-height:.9}.poster .month{font-size:14px;letter-spacing:2px;font-weight:900;text-transform:uppercase}.card-body{padding:22px}.card h3{margin:0 0 9px;font-size:22px}.meta{display:flex;gap:12px;flex-wrap:wrap;color:#616b7c;font-weight:700;font-size:14px;margin:10px 0}.desc{color:#4b5568;line-height:1.45}.price-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}.price{font-size:24px;font-weight:900}.seats{font-size:13px;background:#eef7f1;color:#137c43;border-radius:999px;padding:8px 10px;font-weight:900}.seats.low{background:#fff7df;color:#9a5b00}.seats.soldout{background:#ffe8ec;color:#bc1230}.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none!important;box-shadow:none!important}.qty{width:74px;padding:10px;border:1px solid #dce2ee;border-radius:12px;font-weight:900;text-align:center}.actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.cart-box{position:fixed;right:22px;bottom:22px;background:#fff;border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.22);width:min(390px,calc(100vw - 44px));z-index:25;overflow:hidden;border:1px solid #dfe5ef}.cart-head{background:#0b1020;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center}.cart-title{display:flex;align-items:center;gap:8px}.cart-actions{display:flex;align-items:center;gap:10px}.cart-toggle{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;border-radius:10px;width:34px;height:30px;font-size:18px;font-weight:900;cursor:pointer}.cart-toggle:hover{background:rgba(255,255,255,.22)}.cart-box.minimized .cart-body{display:none}.cart-box.minimized{width:min(300px,calc(100vw - 44px))}.cart-box.minimized .cart-head{border-radius:22px}.cart-body{padding:16px;max-height:360px;overflow:auto}.cart-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 0;border-bottom:1px solid #edf1f7}.cart-item b{display:block}.cart-total{display:flex;justify-content:space-between;font-size:20px;font-weight:900;padding:14px 0}.empty{padding:16px;background:#f6f8fc;border-radius:14px;color:#697386;text-align:center}.toast{max-width:1180px;margin:18px auto 0;padding:14px 18px;border-radius:14px;font-weight:800}.toast.ok{background:#eafaf1;color:#106d3b}.toast.err{background:#fff0f2;color:#b1162b}.modal-backdrop{position:fixed;inset:0;background:rgba(4,8,18,.68);display:none;align-items:center;justify-content:center;z-index:50;padding:18px}.modal-backdrop.active{display:flex}.modal{width:min(460px,100%);background:#fff;border-radius:24px;box-shadow:0 25px 90px rgba(0,0,0,.32);padding:26px;position:relative}.modal h2{margin:0 0 8px;font-size:28px}.close{position:absolute;right:18px;top:16px;border:0;background:#eef2f8;border-radius:10px;width:36px;height:36px;font-size:20px;cursor:pointer}.form-row{margin:13px 0}.form-row label{display:block;font-weight:900;margin-bottom:7px}.form-row input{width:100%;padding:13px;border:1px solid #dce2ee;border-radius:12px;font-size:15px}.field-error{color:#c01832;font-weight:800;font-size:13px;margin-top:5px}.modal .link{background:none;border:0;color:#244bd8;font-weight:900;cursor:pointer;padding:0}.checkout-form{margin:0}.promo-box{display:grid;grid-template-columns:1fr auto;gap:8px;margin:12px 0}.promo-box input{padding:12px;border:1px solid #dce2ee;border-radius:12px;font-weight:800}.promo-note{font-size:13px;color:#687285;margin:6px 0 0}.discount-line{display:flex;justify-content:space-between;color:#087645;font-weight:900;margin:8px 0}.favorite-btn{background:#fff;border:1px solid #dfe5ef;border-radius:999px;padding:10px 12px;font-weight:900;cursor:pointer}.favorite-btn.active{background:#fff4d8;border-color:#f0c34f;color:#8a5b00}.footer{margin-top:45px;background:#0b1020;color:#b9c3d7;padding:28px 22px;text-align:center}.nav-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:999px;background:#00d084;color:#06120c;font-size:12px;font-weight:950;margin-left:4px;padding:0 7px}.account-chip{display:inline-flex;align-items:center;gap:7px;background:#eef3fb;color:#172033;border-radius:999px;padding:9px 12px;font-weight:900}.profile-panel{max-width:1180px;margin:18px auto 0;padding:0 22px}.profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.profile-card{background:#fff;border:1px solid #e3e9f4;border-radius:20px;padding:18px;box-shadow:0 8px 25px rgba(13,23,48,.06)}.profile-card b{display:block;font-size:24px;margin-bottom:4px}.quick-menu{max-width:1180px;margin:20px auto 0;padding:0 22px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.quick-card{background:#fff;border:1px solid #e3e9f4;border-radius:18px;padding:16px;text-decoration:none;color:#172033;font-weight:900;box-shadow:0 8px 24px rgba(13,23,48,.06)}.quick-card span{display:block;color:#687285;font-size:13px;font-weight:700;margin-top:4px}
+
+        /* visual polish and extra homepage blocks */
+        body{background:radial-gradient(circle at top left,#eef8ff 0,#f4f6fb 34%,#f7f8fc 100%)}
+        .topbar{backdrop-filter:blur(14px);background:rgba(7,16,32,.96)}
+        .hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#071020 0%,#12245a 45%,#00a86b 100%)}
+        .hero:before{content:'';position:absolute;inset:-120px -90px auto auto;width:420px;height:420px;border-radius:50%;background:rgba(0,208,132,.24);filter:blur(22px)}
+        .hero:after{content:'';position:absolute;left:-140px;bottom:-160px;width:360px;height:360px;border-radius:50%;background:rgba(255,255,255,.11);filter:blur(16px)}
+        .hero-inner{position:relative;z-index:1}
+        .hero-kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:8px 12px;border-radius:999px;font-weight:900;margin-bottom:16px;color:#dffdf1}
+        .trust-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px;max-width:720px}.trust-card{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:14px}.trust-card b{display:block;font-size:20px}.trust-card span{font-size:13px;opacity:.86}
+        .searchbox{border:1px solid rgba(255,255,255,.24)}.searchbox h3{margin:0 0 12px;font-size:22px}.filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.filter-grid .full{grid-column:1/-1}
+        .featured-strip{max-width:1180px;margin:-28px auto 0;padding:0 22px;position:relative;z-index:3}.featured-inner{background:#fff;border:1px solid #e4e9f2;border-radius:24px;box-shadow:0 18px 45px rgba(12,22,48,.12);padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.feature-tile{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:18px;background:#f7f9fd}.feature-tile .icon{font-size:24px}.feature-tile b{display:block}.feature-tile span{font-size:13px;color:#667085}
+        .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 18px}.toolbar select,.toolbar input{border:1px solid #dce2ee;border-radius:12px;padding:11px 13px;background:#fff;font-weight:800;color:#273044}.toolbar input{min-width:230px}.no-results{display:none;background:#fff;border:1px dashed #cfd7e6;border-radius:22px;padding:30px;text-align:center;color:#667085;font-weight:800}
+        .card{position:relative;transition:.22s ease}.card:hover{transform:translateY(-4px);box-shadow:0 18px 50px rgba(13,23,48,.14)}.poster{position:relative;overflow:hidden}.poster:after{content:'';position:absolute;right:-35px;bottom:-35px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.13)}
+        .tagline{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:#eef4ff;color:#254bb3;font-size:12px;font-weight:900}.details-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pill{background:#f1f5f9;color:#475569;border-radius:999px;padding:7px 9px;font-size:12px;font-weight:900}.pill.green{background:#ecfff6;color:#087645}.pill.orange{background:#fff7df;color:#9a5b00}
+        .share-btn{background:#f5f7fb;border:1px solid #dfe5ef;border-radius:999px;padding:10px 12px;font-weight:900;cursor:pointer}.share-btn:hover{background:#eef3fb}
+        .info-section{max-width:1180px;margin:0 auto;padding:10px 22px 38px;display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.panel{background:#fff;border:1px solid #e6eaf2;border-radius:24px;padding:24px;box-shadow:0 10px 30px rgba(13,23,48,.07)}.panel h2{margin:0 0 12px;font-size:28px}.steps{display:grid;gap:12px}.step{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:13px;border-radius:16px;background:#f8fafc}.step-num{background:#00d084;color:#06120c;border-radius:12px;width:34px;height:34px;display:grid;place-items:center;font-weight:950}.faq-item{border-bottom:1px solid #edf1f7;padding:14px 0}.faq-item:last-child{border-bottom:0}.faq-item summary{cursor:pointer;font-weight:950}.faq-item p{color:#667085;line-height:1.5;margin:10px 0 0}
+        .newsletter{max-width:1180px;margin:0 auto 28px;padding:0 22px}.newsletter-box{background:linear-gradient(135deg,#0b1020,#13275b);color:#fff;border-radius:26px;padding:26px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;box-shadow:0 18px 50px rgba(13,23,48,.16)}.newsletter-box h2{margin:0 0 6px}.newsletter-form{display:flex;gap:10px}.newsletter-form input{min-width:280px;padding:13px;border:1px solid rgba(255,255,255,.3);border-radius:13px;background:rgba(255,255,255,.1);color:#fff}.newsletter-form input::placeholder{color:#d4d8e3}
+        .footer{padding:34px 22px}.footer-grid{max-width:1180px;margin:auto;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;text-align:left}.footer-links{display:flex;gap:14px;flex-wrap:wrap}.footer-links span{background:rgba(255,255,255,.08);padding:8px 10px;border-radius:999px}
+
+
+        .theme-toggle{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.10);color:#fff;border-radius:14px;width:44px;height:42px;font-weight:950;cursor:pointer;font-size:18px}.theme-toggle:hover{background:rgba(255,255,255,.18)}
+        body.dark-mode{background:#070b16;color:#e9eef8}body.dark-mode .card,body.dark-mode .searchbox,body.dark-mode .panel,body.dark-mode .cart-box,body.dark-mode .modal,body.dark-mode .featured-inner{background:#111827;color:#e9eef8;border-color:#243047}body.dark-mode .muted,body.dark-mode .desc,body.dark-mode .feature-tile span,body.dark-mode .promo-note{color:#aeb8cb}body.dark-mode .feature-tile,body.dark-mode .empty,body.dark-mode .note-soft,body.dark-mode .profile-card,body.dark-mode .quick-card{background:#0b1222}body.dark-mode .toolbar input,body.dark-mode .toolbar select,body.dark-mode .searchbox input,body.dark-mode .searchbox select,body.dark-mode .promo-box input,body.dark-mode .form-row input{background:#0b1222;color:#fff;border-color:#2c3850}body.dark-mode .btn{background:#243047;color:#f8fbff}body.dark-mode .btn.primary{background:#00d084;color:#06120c}body.dark-mode .btn.danger{background:#3a1720;color:#ffb6c3}
+        .seat-progress{height:8px;border-radius:999px;background:#edf2f8;overflow:hidden;margin-top:10px}.seat-progress span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#00d084,#54d6ff);width:35%}.card-mini-info{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.mini-chip{font-size:12px;border:1px solid #e0e6f0;background:#f8fafc;border-radius:999px;padding:7px 10px;font-weight:900;color:#526074}body.dark-mode .mini-chip{background:#0b1222;border-color:#2c3850;color:#c3cce0}
+        .details-modal{width:min(780px,100%)}.details-hero{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.details-card{background:#f7f9fd;border:1px solid #e5eaf2;border-radius:18px;padding:16px}.details-card b{display:block;margin-bottom:4px}.detail-title{font-size:34px;line-height:1.05;margin:8px 0 10px;letter-spacing:-1px}.detail-desc{line-height:1.55;color:#4b5568}.detail-price{font-size:30px;font-weight:950}.countdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.count-box{background:#0b1020;color:#fff;border-radius:14px;padding:12px;text-align:center}.count-box b{font-size:20px;display:block}.count-box span{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#b8c2d5}body.dark-mode .details-card{background:#0b1222;border-color:#2c3850}body.dark-mode .detail-desc{color:#c6cede}
+        .recent-section{max-width:1180px;margin:0 auto 26px;padding:0 22px;display:none}.recent-section.active{display:block}.recent-list{display:flex;gap:12px;overflow:auto;padding:6px 0 4px}.recent-item{min-width:235px;background:#fff;border:1px solid #e3e9f3;border-radius:18px;padding:14px;box-shadow:0 8px 22px rgba(13,23,48,.07);cursor:pointer}.recent-item b{display:block;margin-bottom:6px}.recent-item span{font-size:13px;color:#687285}.recent-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.recent-title h2{font-size:24px;margin:0}body.dark-mode .recent-item{background:#111827;border-color:#243047}body.dark-mode .recent-item span{color:#aeb8cb}
+        .cart-line-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}.mini-btn{border:0;border-radius:10px;background:#eef3fb;color:#121827;font-weight:950;width:30px;height:30px;cursor:pointer}.mini-btn:hover{filter:brightness(.96)}.clear-cart{width:100%;margin-top:8px;background:#f1f4f9;color:#202a3d}.stock-label{font-size:12px;font-weight:900;color:#667085;margin-top:6px}.favorite-filter.active{background:#fff4d8;color:#8a5b00;border-color:#f0c34f}.no-results{display:none;background:#fff;border:1px dashed #cfd8e8;border-radius:18px;padding:28px;text-align:center;color:#657086;font-weight:800}body.dark-mode .no-results{background:#111827;border-color:#32405a;color:#b9c3d7}
+        @media(max-width:760px){.details-hero{grid-template-columns:1fr}.countdown{grid-template-columns:repeat(2,1fr)}.detail-title{font-size:28px}}
+
+
+        .compare-bar{position:fixed;left:22px;bottom:22px;background:#101827;color:#fff;border-radius:20px;padding:14px 16px;box-shadow:0 18px 55px rgba(0,0,0,.24);z-index:24;display:none;align-items:center;gap:12px;max-width:calc(100vw - 44px)}.compare-bar.active{display:flex}.compare-bar b{white-space:nowrap}.compare-list{display:flex;gap:7px;flex-wrap:wrap}.compare-pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:7px 9px;font-size:12px;font-weight:900}.compare-btn.active{background:#dff7ea;color:#087645;border-color:#87d8aa}.rating-row{display:flex;align-items:center;gap:6px;margin-top:12px;color:#7b8494;font-weight:900}.star-btn{border:0;background:transparent;font-size:20px;cursor:pointer;filter:grayscale(1);padding:0}.star-btn.active{filter:none}.seat-map{margin-top:14px;background:#f8fafc;border:1px solid #e3e9f3;border-radius:18px;padding:16px}.seat-stage{text-align:center;background:#101827;color:#fff;border-radius:12px;padding:8px;font-weight:950;margin-bottom:12px}.seat-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}.seat{height:18px;border-radius:6px;background:#d9f3e4;border:1px solid #b8e8cc}.seat.taken{background:#ffd6de;border-color:#ffadbc}.seat.selected{background:#00d084;border-color:#00a768}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:#677185;font-size:12px;font-weight:900}.legend span{display:flex;gap:5px;align-items:center}.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;background:#d9f3e4}.legend i.taken{background:#ffd6de}.legend i.selected{background:#00d084}.reminder-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.reminder-options button{border:1px solid #dfe5ef;background:#f8fafc;border-radius:14px;padding:12px;font-weight:950;cursor:pointer}.compare-table{width:100%;border-collapse:separate;border-spacing:0 8px}.compare-table th,.compare-table td{text-align:left;padding:10px;background:#f8fafc}.compare-table th:first-child,.compare-table td:first-child{border-radius:12px 0 0 12px}.compare-table th:last-child,.compare-table td:last-child{border-radius:0 12px 12px 0}.modal.wide{width:min(760px,100%)}.trust-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.trust-badges span{background:#eef4ff;color:#244bd8;border-radius:999px;padding:8px 10px;font-size:12px;font-weight:950}body.dark-mode .seat-map,body.dark-mode .compare-table th,body.dark-mode .compare-table td,body.dark-mode .reminder-options button{background:#0b1222;border-color:#2c3850;color:#e9eef8}body.dark-mode .compare-bar{background:#151f32}
+        @media(max-width:980px){.profile-grid,.quick-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.nav{grid-template-columns:1fr;gap:12px}.links{justify-content:flex-start;overflow:auto}.auth{justify-content:flex-start;min-width:0}.hero-inner{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.hero h1{font-size:42px}.featured-inner{grid-template-columns:repeat(2,1fr)}.info-section{grid-template-columns:1fr}.newsletter-box{grid-template-columns:1fr}.newsletter-form{flex-direction:column}.trust-row{grid-template-columns:1fr}}
+        @media(max-width:600px){.profile-grid,.quick-menu{grid-template-columns:1fr}.nav{padding:12px 14px}.auth{flex-wrap:wrap}.user-menu{width:100%;justify-content:space-between}.links{gap:4px}.links a{padding:9px 10px}.card{grid-template-columns:1fr}.poster{min-height:160px}.hero h1{font-size:34px}.cart-box{right:12px;bottom:12px;width:calc(100vw - 24px)}.featured-inner{grid-template-columns:1fr}.filter-grid{grid-template-columns:1fr}.toolbar input{min-width:100%;width:100%}.footer-grid{grid-template-columns:1fr}.newsletter-form input{min-width:0;width:100%}}
+    
+        .points-chip{display:inline-flex;align-items:center;gap:6px;background:#fff7db;color:#8a5b00;border-radius:999px;padding:9px 12px;font-weight:950}
+        .loyalty-panel{max-width:1180px;margin:24px auto 0;padding:0 22px;display:none}.loyalty-panel.active{display:block}
+        .loyalty-wrap{background:#fff;border:1px solid #e3e9f4;border-radius:24px;padding:22px;box-shadow:0 12px 32px rgba(13,23,48,.08);display:grid;grid-template-columns:1fr 1.15fr;gap:20px;align-items:start}
+        .points-balance{background:linear-gradient(135deg,#101827,#243c7a);color:#fff;border-radius:22px;padding:24px}.points-balance b{display:block;font-size:44px;line-height:1;margin:8px 0}.level-pill{display:inline-flex;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:8px 11px;font-weight:950}
+        .points-progress{height:12px;background:rgba(255,255,255,.2);border-radius:999px;overflow:hidden;margin:14px 0 8px}.points-progress span{display:block;height:100%;background:#00d084;border-radius:999px;width:0}
+        .points-history{background:#f8fafc;border:1px solid #e5ebf5;border-radius:18px;padding:16px}.points-history h3{margin:0 0 12px}.points-list{display:grid;gap:9px;max-height:260px;overflow:auto}.points-item{display:flex;justify-content:space-between;gap:12px;background:#fff;border:1px solid #e8edf6;border-radius:14px;padding:10px 12px;font-weight:800}.points-item small{display:block;color:#687285;font-weight:700;margin-top:3px}.points-plus{color:#087645}.points-minus{color:#b1162b}.use-points-row{margin:12px 0;padding:12px;border:1px solid #e3e9f4;border-radius:14px;background:#fbfcff}.use-points-row label{display:flex;gap:8px;align-items:flex-start;font-weight:900}.use-points-row small{display:block;color:#687285;margin-top:4px}.reward-line{display:flex;justify-content:space-between;color:#8a5b00;font-weight:900;margin:8px 0}.points-note{font-size:13px;color:#687285;margin-top:8px}body.dark-mode .loyalty-wrap,body.dark-mode .points-history,body.dark-mode .points-item,body.dark-mode .use-points-row{background:#111827;border-color:#28344a;color:#e9eef8}
+
+
+        /* Header layout fix: prevents menu, counters and profile area from overlapping */
+        .topbar{overflow:visible}
+        .nav{
+            max-width:1600px;
+            width:100%;
+            grid-template-columns:auto minmax(0,1fr) auto;
+            gap:18px;
+            padding:12px 24px;
+        }
+        .links{
+            min-width:0;
+            justify-content:center;
+            gap:6px;
+            flex-wrap:nowrap;
+        }
+        .links a{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:9px 10px;
+            white-space:nowrap;
+            line-height:1;
+        }
+        .nav-badge{
+            position:static;
+            flex:0 0 auto;
+            min-width:20px;
+            height:20px;
+            padding:0 6px;
+            margin-left:0;
+            font-size:11px;
+            line-height:20px;
+        }
+        .auth{min-width:0;flex:0 0 auto}
+        .user-menu{
+            display:flex;
+            align-items:center;
+            flex-wrap:nowrap;
+            gap:8px;
+            padding:6px;
+            max-width:100%;
+        }
+        .hello{padding:9px 12px;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+        .account-chip,.points-chip{padding:8px 11px;line-height:1}
+        .theme-toggle{flex:0 0 auto}
+        .auth .btn{padding:11px 16px}
+
+        @media(max-width:1350px){
+            .nav{grid-template-columns:1fr;gap:10px;align-items:start}
+            .logo{justify-self:start}
+            .links{justify-content:flex-start;overflow-x:auto;width:100%;padding-bottom:4px;scrollbar-width:thin}
+            .auth{justify-content:flex-start;width:100%}
+            .user-menu{width:auto}
+        }
+        @media(max-width:720px){
+            .nav{padding:12px 14px}
+            .links a{font-size:14px;padding:9px 9px}
+            .auth{flex-wrap:wrap}
+            .user-menu{flex-wrap:wrap;border-radius:16px}
+            .hello{max-width:100%;width:100%}
+        }
+
+    </style>
+</head>
+<body th:attr="data-auth-mode=${authMode}">
+<header class="topbar">
+    <nav class="nav">
+        <a class="logo" href="/visualization">Eventora<span>.</span></a>
+        <div class="links">
+            <a href="/visualization">Начало</a>
+            <a href="#events">Събития</a>
+            <a href="#favorites" onclick="showFavoritesFromMenu(event)">Любими <span class="nav-badge" id="favoriteMenuCount">0</span></a>
+            <a th:if="${username != null}" href="/my-tickets">Билети <span class="nav-badge" th:text="${boughtTicketsCount}">0</span></a>
+            <a href="#points" onclick="showPointsPanel(event)">Точки <span class="nav-badge" id="pointsMenuCount">0</span></a>
+            <a href="#cart" onclick="scrollToCart();return false;">Кошница <span class="nav-badge cart-count">0</span></a>
+            <a th:if="${isAdmin}" href="/admin/events">Админ</a>
+            <a href="#help">Помощ</a>
+        </div>
+        <div class="auth">
+            <button class="theme-toggle" type="button" onclick="toggleTheme()" id="themeToggle" title="Смени тема">🌙</button>
+            <th:block th:if="${username == null}">
+                <button class="btn outline" onclick="openModal('loginModal')">Вход</button>
+                <button class="btn primary" onclick="openModal('registerModal')">Регистрация</button>
+            </th:block>
+            <th:block th:if="${username != null}">
+                <div class="user-menu">
+                    <span class="hello">Здравей, <span th:text="${username}">user</span></span><span class="account-chip">🎟️ <span th:text="${boughtTicketsCount}">0</span></span><span class="points-chip">⭐ <span id="headerPoints">0</span></span>
+                    <form method="post" action="/logout"><button class="btn danger" type="submit">Изход</button></form>
+                </div>
+            </th:block>
+        </div>
+    </nav>
+</header>
+
+<div th:if="${message}" class="toast ok" th:text="${message}"></div>
+<div th:if="${error}" class="toast err" th:text="${error}"></div>
+
+<section class="profile-panel" th:if="${username != null}">
+    <div class="profile-grid">
+        <div class="profile-card"><b th:text="${boughtTicketsCount}">0</b><span class="muted">купени билета</span></div>
+        <div class="profile-card"><b th:text="${orderCount}">0</b><span class="muted">поръчки</span></div>
+        <div class="profile-card"><b id="favoriteStats">0</b><span class="muted">любими събития</span></div>
+        <div class="profile-card"><b id="cartStats">0</b><span class="muted">билета в кошницата</span></div>
+        <div class="profile-card"><b id="profilePoints">0</b><span class="muted">Eventora точки</span></div>
+    </div>
+</section>
+<section class="quick-menu">
+    <a class="quick-card" href="#events">🎫 Купи билети<span>Разгледай всички налични събития</span></a>
+    <a class="quick-card" href="#favorites" onclick="showFavoritesFromMenu(event)">⭐ Любими<span>Покажи запазените събития</span></a>
+    <a class="quick-card" th:if="${username != null}" href="/my-tickets">🎟️ Моите билети<span>Отвори закупените билети</span></a>
+    <a class="quick-card" href="#points" onclick="showPointsPanel(event)">⭐ Моите точки<span>Баланс, ниво и история</span></a>
+    <a class="quick-card" href="#help">❓ Помощ<span>Промо кодове, отказване и въпроси</span></a>
+</section>
+
+<section class="loyalty-panel" id="pointsPanel">
+    <div class="loyalty-wrap">
+        <div class="points-balance">
+            <span class="level-pill" id="pointsLevel">Bronze</span>
+            <b><span id="pointsBalance">0</span> т.</b>
+            <div>Eventora точки</div>
+            <div class="points-progress"><span id="pointsProgress"></span></div>
+            <div class="points-note" id="pointsNextReward">Още 100 т. до следваща награда.</div>
+        </div>
+        <div class="points-history">
+            <h3>История на точките</h3>
+            <div class="points-list" id="pointsHistoryList"></div>
+            <p class="points-note">Получаваш по 1 точка за всяко похарчено евро. При 100 точки можеш да използваш 10 € отстъпка в кошницата.</p>
+        </div>
+    </div>
+</section>
+
+<section class="hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-kicker">⭐ Билети за водещи събития</div>
+            <h1>Избери събитие и вземи билет за минути</h1>
+            <p>Открий концерти, театър, спортни срещи, фестивали и конференции. Добави билети в кошницата, използвай промо код и получи електронен билет в профила си.</p>
+            <div class="badges"><span class="badge">🔒 Сигурен профил</span><span class="badge">🎫 Електронни билети</span><span class="badge">↩️ Отказване на билет</span><span class="badge">🏷️ Промо кодове</span></div>
+            <div class="trust-row">
+                <div class="trust-card"><b>24/7</b><span>достъп до билетите</span></div>
+                <div class="trust-card"><b>€</b><span>ясни цени без изненади</span></div>
+                <div class="trust-card"><b>QR</b><span>визуализация на всеки билет</span></div>
+            </div>
+        </div>
+        <div class="searchbox">
+            <h3>Намери събитие</h3>
+            <label>Търси по име</label><input id="searchInput" placeholder="Концерт, театър, конференция..." oninput="filterEvents()">
+            <div class="filter-grid">
+                <div><label>Категория</label><select id="categoryFilter" onchange="filterEvents()"><option value="all">Всички категории</option><option>Концерт</option><option>Комедия</option><option>Конференция</option><option>Театър</option><option>Спорт</option><option>Фестивал</option><option>Детско</option></select></div>
+                <div><label>Подредба</label><select id="sortFilter" onchange="sortEvents()"><option value="date">По дата</option><option value="priceAsc">Цена: ниска към висока</option><option value="priceDesc">Цена: висока към ниска</option><option value="seats">Най-много места</option></select></div>
+                <button class="btn primary full" onclick="document.getElementById('events').scrollIntoView({behavior:'smooth'})">Виж събития</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="featured-strip" aria-label="Предимства">
+    <div class="featured-inner">
+        <div class="feature-tile"><div class="icon">🎟️</div><div><b>Билет в профила</b><span>Всеки закупен билет се пази в „Моите билети“.</span></div></div>
+        <div class="feature-tile"><div class="icon">🔎</div><div><b>Бързо търсене</b><span>Филтрирай по категория, име и цена.</span></div></div>
+        <div class="feature-tile"><div class="icon">🏷️</div><div><b>Промо кодове</b><span>Използвай отстъпки директно в кошницата.</span></div></div>
+        <div class="feature-tile"><div class="icon">↩️</div><div><b>Контрол над покупките</b><span>Отказан билет връща местата обратно.</span></div></div>
+        <div class="feature-tile"><div class="icon">🌙</div><div><b>Светла и тъмна тема</b><span>Запомня се автоматично в браузъра.</span></div></div>
+        <div class="feature-tile"><div class="icon">👁️</div><div><b>Последно разгледани</b><span>Лесно се връщаш към събитията, които си отворил.</span></div></div>
+        <div class="feature-tile"><div class="icon">📅</div><div><b>Календар</b><span>Свали събитието като .ics файл и го добави в календара си.</span></div></div>
+        <div class="feature-tile"><div class="icon">⚖️</div><div><b>Сравняване</b><span>Сравни няколко събития по цена, дата и свободни места.</span></div></div>
+    </div>
+</section>
+
+<main class="wrap" id="events">
+    <div class="section-head"><div><h2>Предстоящи събития</h2><p class="muted">Избери концерт, театър, спорт, фестивал или детско събитие и добави билети в кошницата.</p></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="event-count" th:text="${#lists.size(events)} + ' събития'">Много събития</span><button class="btn dark" onclick="scrollToCart()">🛒 Кошница: <span class="cart-count">0</span></button></div></div>
+    <div class="toolbar">
+        <input id="secondarySearch" placeholder="Бързо търсене в списъка..." oninput="document.getElementById('searchInput').value=this.value; filterEvents()">
+        <select onchange="document.getElementById('sortFilter').value=this.value; sortEvents()">
+            <option value="date">Сортирай по дата</option>
+            <option value="priceAsc">Най-ниска цена</option>
+            <option value="priceDesc">Най-висока цена</option>
+            <option value="seats">Най-много свободни места</option>
+        </select>
+        <button class="btn favorite-filter" id="favoriteFilter" type="button" onclick="toggleFavoriteFilter()">★ Покажи любими</button>
+        <button class="btn" type="button" onclick="openCompare()">⚖️ Сравни избрани</button>
+        <button class="btn" type="button" onclick="clearFilters()">Изчисти филтрите</button>
+    </div>
+    <div class="quick-cats" aria-label="Бърз избор на категория">
+        <button type="button" onclick="setCategory('all')">Всички</button>
+        <button type="button" onclick="setCategory('Концерт')">Концерти</button>
+        <button type="button" onclick="setCategory('Комедия')">Комедия</button>
+        <button type="button" onclick="setCategory('Конференция')">Конференции</button>
+        <button type="button" onclick="setCategory('Театър')">Театър</button>
+        <button type="button" onclick="setCategory('Спорт')">Спорт</button>
+        <button type="button" onclick="setCategory('Фестивал')">Фестивали</button>
+        <button type="button" onclick="setCategory('Детско')">Детски</button>
+    </div>
+    <div class="grid">
+        <article class="card event-card" data-title="Imagine Dragons Tribute" data-category="Концерт" data-price="75.00" data-seats="120" data-date="2026-06-18T20:00"
+                 th:each="event : ${events}" th:attr="data-title=${event.title},data-category=${event.category},data-price=${event.price},data-seats=${event.availableSeats},data-date=${event.startsAt},data-location=${event.location},data-description=${event.description},data-capacity=${event.venue.capacity},data-date-label=${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')}">
+            <div class="poster"><span class="cat" th:text="${event.category}">Концерт</span><div><div class="day" th:text="${#temporals.format(event.startsAt,'dd')}">18</div><div class="month" th:text="${#temporals.format(event.startsAt,'MMM yyyy')}">JUN 2026</div></div></div>
+            <div class="card-body">
+                <h3 th:text="${event.title}">Event title</h3>
+                <div class="meta"><span th:text="'📍 ' + ${event.location}">location</span><span th:text="'🕘 ' + ${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')}">date</span></div>
+                <p class="desc" th:text="${event.description}">Description</p>
+                <span class="tagline">Официален електронен билет</span>
+                <div class="card-mini-info"><span class="mini-chip" th:text="'Капацитет: ' + ${event.venue.capacity}">Капацитет</span><span class="mini-chip">Без хартиен билет</span></div>
+                <div class="trust-badges"><span>Защитено плащане</span><span>QR вход</span><span>Мобилен билет</span></div>
+                <div class="details-row"><span class="pill green">QR вход</span><span class="pill">до 8 билета</span><span class="pill orange">e-ticket</span></div>
+                <div class="price-row">
+                    <div>
+                        <div class="muted">Цена на билет</div>
+                        <div class="price" th:text="${#numbers.formatDecimal(event.price,1,2)} + ' €'">75.00 €</div>
+                    </div>
+                    <div>
+                        <span class="seats"
+                              th:classappend="${event.availableSeats == 0 ? ' soldout' : (event.availableSeats <= 10 ? ' low' : '')}"
+                              th:text="${event.availableSeats == 0 ? 'Разпродадено' : (event.availableSeats <= 10 ? 'Последни ' + event.availableSeats + ' билета' : event.availableSeats + ' свободни места')}">120 места</span>
+                        <div class="seat-progress" title="Свободни места"><span th:style="'width:' + ${event.venue.capacity == 0 ? 0 : (event.availableSeats * 100 / event.venue.capacity)} + '%'"></span></div>
+                        <div class="stock-label" th:text="${event.availableSeats} + ' от ' + ${event.venue.capacity} + ' места'">120 от 1000 места</div>
+                    </div>
+                </div>
+                <div class="price-row">
+                    <div class="actions">
+                        <input class="qty" id="qty-event-1" type="number" min="1" max="8" value="1"
+                               th:id="'qty-' + ${event.id}"
+                               th:max="${event.availableSeats < 8 ? event.availableSeats : 8}"
+                               th:disabled="${event.availableSeats == 0}">
+                        <button class="btn primary" type="button" data-id="event-1" data-title="Imagine Dragons Tribute" data-price="75.00" data-seats="120"
+                                th:attr="data-id=${event.id},data-title=${event.title},data-price=${event.price},data-seats=${event.availableSeats}"
+                                th:disabled="${event.availableSeats == 0}"
+                                th:text="${event.availableSeats == 0 ? 'Разпродадено' : 'Добави в кошница'}"
+                                onclick="addToCart(this)">Добави в кошница</button>
+                        <button class="btn dark" type="button" th:attr="data-id=${event.id},data-title=${event.title},data-category=${event.category},data-price=${event.price},data-seats=${event.availableSeats},data-location=${event.location},data-description=${event.description},data-capacity=${event.venue.capacity},data-date=${event.startsAt},data-date-label=${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')}" onclick="openDetails(this)">Детайли</button>
+                        <button class="favorite-btn" type="button" title="Запази в любими" data-id="event-1" th:attr="data-id=${event.id}" onclick="toggleFavorite(this)">☆ Любими</button>
+                        <button class="share-btn" type="button" th:attr="data-title=${event.title}" onclick="shareEvent(this)">Сподели</button>
+                        <button class="btn compare-btn" type="button" th:attr="data-id=${event.id},data-title=${event.title},data-category=${event.category},data-price=${event.price},data-seats=${event.availableSeats},data-location=${event.location},data-date=${event.startsAt},data-date-label=${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')}" onclick="toggleCompare(this)">Сравни</button>
+                        <button class="btn" type="button" th:attr="data-title=${event.title},data-location=${event.location},data-date=${event.startsAt},data-date-label=${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')},data-description=${event.description}" onclick="downloadCalendar(this)">Календар</button>
+                        <button class="btn" type="button" th:attr="data-id=${event.id},data-title=${event.title},data-date-label=${#temporals.format(event.startsAt,'dd.MM.yyyy HH:mm')}" onclick="openReminder(this)">Напомни</button>
+                        <button class="btn price-alert-btn" type="button" th:attr="data-title=${event.title},data-price=${event.price}" onclick="openPriceAlert(this)">Ценови сигнал</button>
+                    </div>
+                    <div class="rating-row" th:attr="data-id=${event.id}"><span>Оцени:</span><button class="star-btn" type="button" onclick="rateEvent(this,1)">⭐</button><button class="star-btn" type="button" onclick="rateEvent(this,2)">⭐</button><button class="star-btn" type="button" onclick="rateEvent(this,3)">⭐</button><button class="star-btn" type="button" onclick="rateEvent(this,4)">⭐</button><button class="star-btn" type="button" onclick="rateEvent(this,5)">⭐</button></div>
+                </div>
+            </div>
+        </article>
+    </div>
+    <div id="noResults" class="no-results">Няма намерени събития по избраните филтри. Опитай с друга категория или изчисти филтрите.</div>
+</main>
+
+
+<section class="recent-section" id="recentSection">
+    <div class="recent-title"><h2>Последно разгледани</h2><button class="btn" type="button" onclick="clearRecent()">Изчисти</button></div>
+    <div class="recent-list" id="recentList"></div>
+</section>
+
+<section class="info-section">
+    <div class="panel">
+        <h2>Как работи покупката?</h2>
+        <div class="steps">
+            <div class="step"><div class="step-num">1</div><div><b>Избираш събитие</b><br><span class="muted">Провери цена, дата, локация и свободни места.</span></div></div>
+            <div class="step"><div class="step-num">2</div><div><b>Добавяш билети в кошницата</b><br><span class="muted">Можеш да използваш промо код преди финалната поръчка.</span></div></div>
+            <div class="step"><div class="step-num">3</div><div><b>Завършваш поръчката</b><br><span class="muted">След покупка билетът се появява в „Моите билети“.</span></div></div>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Чести въпроси</h2>
+        <details class="faq-item"><summary>Къде виждам закупените билети?</summary><p>След вход отвори „Моите билети“. Там можеш да видиш електронния билет с номер и QR визуализация.</p></details>
+        <details class="faq-item"><summary>Какво става при отказване на билет?</summary><p>Билетът се маркира като отказан, а свободните места за събитието се увеличават обратно.</p></details>
+        <details class="faq-item"><summary>Има ли промо кодове?</summary><p>Да. За тест можеш да използваш PROMO10, STUDENT15 или VIP20 в кошницата.</p></details>
+    </div>
+</section>
+
+<section class="info-section">
+    <div class="panel">
+        <h2>Още удобства</h2>
+        <div class="mini-feature-grid">
+            <div class="mini-feature"><b>🎁 Подаръчен билет</b><span>Маркирай билета като подарък и добави лично послание в кошницата.</span></div>
+            <div class="mini-feature"><b>🔔 Ценови сигнал</b><span>Запази желана цена и получи известие в профила.</span></div>
+            <div class="mini-feature"><b>💬 Бърза помощ</b><span>Отвори помощника долу вляво за насоки при покупка, промо кодове и билети.</span></div>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Препоръчани промо кодове</h2>
+        <p class="muted">Използвай <b>PROMO10</b>, <b>STUDENT15</b> или <b>VIP20</b> в кошницата. Отстъпката се показва преди финалната поръчка.</p>
+        <button class="btn primary" type="button" onclick="scrollToCart()">Пробвай промо код</button>
+    </div>
+</section>
+
+<section class="newsletter">
+    <div class="newsletter-box">
+        <div><h2>Следи новите събития</h2><p class="muted" style="color:#d8deea;margin:0">Остави имейл за известия за концерти, фестивали и специални оферти.</p></div>
+        <form class="newsletter-form" onsubmit="subscribeNewsletter(event)"><input id="newsletterEmail" type="email" placeholder="your@email.com" required><button class="btn primary" type="submit">Абонирай се</button></form>
+    </div>
+</section>
+
+<section class="cart-box" id="cart">
+    <div class="cart-head">
+        <div class="cart-title"><b>🛒 Моята кошница</b></div>
+        <div class="cart-actions"><span id="cartMini">0 билета</span><button class="cart-toggle" type="button" onclick="toggleCart()" id="cartToggle" aria-label="Минимизирай кошницата">−</button></div>
+    </div>
+    <div class="cart-body">
+        <div id="cartItems" class="empty">Кошницата е празна.</div>
+        <div class="cart-total"><span>Общо:</span><span id="cartTotal">0.00 €</span></div>
+        <div class="promo-box">
+            <input id="promoCode" placeholder="Промо код: PROMO10, STUDENT15 или VIP20" oninput="renderCart()">
+            <button class="btn dark" type="button" onclick="applyPromoCode()">Приложи</button>
+        </div>
+        <div class="promo-note" id="promoText">Промо кодовете се прилагат към текущата кошница.</div>
+        <div class="discount-line" id="discountLine" style="display:none"><span>Отстъпка:</span><span id="discountValue">-€0.00</span></div>
+        <div class="reward-line" id="pointsRewardLine" style="display:none"><span>Отстъпка с точки:</span><span id="pointsRewardValue">-€0.00</span></div>
+        <div class="use-points-row"><label><input type="checkbox" id="usePointsDiscount" onchange="renderCart()"><span>Използвай 100 точки за 10 € отстъпка<small id="usePointsInfo">Налични: 0 т.</small></span></label></div>
+        <button class="btn clear-cart" type="button" onclick="clearCart()">Изчисти кошницата</button>
+        <div class="addon-card">
+            <label class="addon-row"><input type="checkbox" id="ticketInsurance" onchange="renderCart()"><span>Защита на билета · €2.99/бр.</span></label>
+            <small>Добавя възможност за по-лесно отказване при промяна в плановете.</small>
+        </div>
+        <div class="addon-card">
+            <label class="addon-row"><input type="checkbox" id="giftTicket" onchange="toggleGiftMessage();renderCart()"><span>Подаръчен билет</span></label>
+            <small>Добави кратко лично послание към електронния билет.</small>
+            <div class="gift-message" id="giftMessageBox"><textarea id="giftMessage" maxlength="180" placeholder="Например: Честит рожден ден! Приятно изкарване."></textarea></div>
+        </div>
+        <div class="loyalty-line"><span>Eventora точки</span><span id="loyaltyPoints">0 т.</span></div>
+        <form class="checkout-form" id="checkoutForm" method="post" action="/checkout">
+            <input type="hidden" name="promoCode" id="promoCodeHidden">
+            <input type="hidden" name="usePoints" id="usePointsHidden" value="false">
+            <input type="hidden" name="pointsEarned" id="pointsEarnedHidden" value="0">
+            <div id="checkoutFields"></div>
+            <button class="btn primary" style="width:100%" type="submit">Завърши поръчката</button>
+        </form>
+        <p class="muted" style="font-size:13px;margin-bottom:0">За финална поръчка трябва да си влязъл в профила си.</p>
+    </div>
+</section>
+
+<div class="footer" id="help"><div class="footer-grid"><div><b>Eventora Tickets</b><br><span>Платформа за събития, електронни билети и управление на поръчки.</span></div><div class="footer-links"><span>Контакти</span><span>Условия</span><span>Поддръжка</span></div></div></div>
+
+
+<button class="support-fab" type="button" onclick="openModal('supportModal')">💬 Помощ</button>
+
+<!-- Event details modal -->
+<div class="modal-backdrop" id="detailsModal">
+    <div class="modal details-modal">
+        <button class="close" onclick="closeModals()">×</button>
+        <div class="label">Детайли за събитието</div>
+        <h2 class="detail-title" id="detailTitle">Събитие</h2>
+        <p class="detail-desc" id="detailDescription">Описание</p>
+        <div class="details-hero">
+            <div class="details-card"><b>📍 Локация</b><span id="detailLocation">-</span></div>
+            <div class="details-card"><b>🕘 Дата и час</b><span id="detailDate">-</span></div>
+            <div class="details-card"><b>🎫 Наличност</b><span id="detailSeats">-</span></div>
+            <div class="details-card"><b>💶 Цена</b><span class="detail-price" id="detailPrice">€0.00</span></div>
+        </div>
+        <div class="countdown" id="detailCountdown"></div>
+        <div class="seat-map">
+            <div class="seat-stage">Сцена / вход</div>
+            <div class="seat-grid" id="seatMap"></div>
+            <div class="legend"><span><i></i> свободни</span><span><i class="taken"></i> заети</span><span><i class="selected"></i> препоръчани</span></div>
+        </div>
+        <div class="btns" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" type="button" id="detailAddBtn">Добави билет</button>
+            <button class="btn dark" type="button" onclick="scrollToCart();closeModals()">Към кошницата</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="compare-bar" id="compareBar"><b>⚖️ Сравнение</b><div class="compare-list" id="compareList"></div><button class="btn primary" type="button" onclick="openCompare()">Отвори</button><button class="btn" type="button" onclick="clearCompare()">Изчисти</button></div>
+
+<!-- COMPARE POPUP -->
+<div class="modal-backdrop" id="compareModal"><div class="modal wide"><button class="close" onclick="closeModals()">×</button><h2>Сравнение на събития</h2><p class="muted">Избери до 3 събития от списъка и сравни най-важните детайли.</p><div id="compareContent" class="empty">Няма избрани събития.</div></div></div>
+
+<!-- REMINDER POPUP -->
+<div class="modal-backdrop" id="reminderModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Напомняне</h2><p class="muted" id="reminderText">Избери кога да получиш напомняне.</p><div class="reminder-options"><button type="button" onclick="saveReminder('1 ден преди')">1 ден преди</button><button type="button" onclick="saveReminder('3 дни преди')">3 дни преди</button><button type="button" onclick="saveReminder('1 седмица преди')">1 седмица преди</button><button type="button" onclick="saveReminder('В деня на събитието')">В деня</button></div><p class="promo-note">Напомнянията се пазят локално в браузъра. След поръчка билетът остава достъпен в профила.</p></div></div>
+
+<!-- PRICE ALERT POPUP -->
+<div class="modal-backdrop" id="priceAlertModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Ценови сигнал</h2><p class="muted" id="priceAlertTitle">Избери цена, при която искаш да получиш известие.</p><div class="price-alert-card"><label>Желана цена (€)</label><input id="priceAlertValue" type="number" min="1" step="1" placeholder="Например 40"></div><button class="btn primary" style="width:100%;margin-top:14px" type="button" onclick="savePriceAlert()">Запази сигнал</button></div></div>
+
+<!-- SUPPORT POPUP -->
+<div class="modal-backdrop" id="supportModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Помощ и поддръжка</h2><p class="muted">Бързи отговори за най-честите ситуации при покупка.</p><div class="support-list"><div class="support-option"><b>Не виждам билета си</b><span>Влез в профила си и отвори „Моите билети“.</span></div><div class="support-option"><b>Промо код не работи</b><span>Провери дали кодът е PROMO10, STUDENT15 или VIP20.</span></div><div class="support-option"><b>Искам да откажа билет</b><span>Отвори конкретния билет и използвай бутона за отказване, ако е наличен.</span></div></div><button class="btn primary" style="width:100%;margin-top:14px" type="button" onclick="alert('Заявката е записана.');closeModals()">Свържи се с поддръжка</button></div></div>
+
+<!-- LOGIN POPUP -->
+<div class="modal-backdrop" id="loginModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Вход</h2><p class="muted">Влез с email или username, за да купуваш билети.</p><form method="post" action="/login" th:object="${loginDto}"><div class="form-row"><label>Имейл или username</label><input th:field="*{email}" autocomplete="username" required><div class="field-error" th:errors="*{email}"></div></div><div class="form-row"><label>Парола</label><input th:field="*{password}" type="password" required><div class="field-error" th:errors="*{password}"></div></div><button class="btn primary" style="width:100%">Вход</button></form><p><button class="link" onclick="switchModal('loginModal','forgotModal')">Забравена парола?</button></p><p class="muted">Нямаш профил? <button class="link" onclick="switchModal('loginModal','registerModal')">Регистрирай се</button></p></div></div>
+
+<!-- REGISTER POPUP -->
+<div class="modal-backdrop" id="registerModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Регистрация</h2><p class="muted">След регистрация ще получиш 6-цифрен код по имейл.</p><form method="post" action="/register" th:object="${registerDto}"><div class="form-row"><label>Потребителско име</label><input th:field="*{username}" required minlength="3"><div class="field-error" th:errors="*{username}"></div></div><div class="form-row"><label>Имейл или username</label><input th:field="*{email}" autocomplete="username" required><div class="field-error" th:errors="*{email}"></div></div><div class="form-row"><label>Парола</label><input th:field="*{password}" type="password" required minlength="6"><div class="field-error" th:errors="*{password}"></div></div><button class="btn primary" style="width:100%">Регистрирай се</button></form><p class="muted">Вече имаш профил? <button class="link" onclick="switchModal('registerModal','loginModal')">Вход</button></p></div></div>
+
+<!-- VERIFY CODE POPUP -->
+<div class="modal-backdrop" id="verifyCodeModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Потвърди имейла</h2><p class="muted">Въведи кода, който получи на пощата. След правилен код ще влезеш автоматично.</p><form method="post" action="/verify-code" th:object="${verifyCodeDto}"><div class="form-row"><label>Email</label><input th:field="*{email}" type="email" required readonly><div class="field-error" th:errors="*{email}"></div></div><div class="form-row"><label>6-цифрен код</label><input th:field="*{code}" inputmode="numeric" maxlength="6" required><div class="field-error" th:errors="*{code}"></div></div><button class="btn primary" style="width:100%">Потвърди и влез</button></form><form method="post" action="/resend-code" style="margin-top:12px"><input type="hidden" name="email" th:value="${verifyCodeDto.email}"><button class="link" type="submit">Изпрати нов код</button></form></div></div>
+
+<!-- FORGOT POPUP -->
+<div class="modal-backdrop" id="forgotModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Забравена парола</h2><p class="muted">Ще ти изпратим линк за смяна на парола.</p><form method="post" action="/forgot-password" th:object="${forgotPasswordDto}"><div class="form-row"><label>Email</label><input th:field="*{email}" type="email" required><div class="field-error" th:errors="*{email}"></div></div><button class="btn primary" style="width:100%">Изпрати линк</button></form></div></div>
+
+<!-- RESET POPUP -->
+<div class="modal-backdrop" id="resetModal"><div class="modal"><button class="close" onclick="closeModals()">×</button><h2>Нова парола</h2><form method="post" action="/reset-password" th:object="${resetPasswordDto}"><input type="hidden" th:field="*{token}"><div class="form-row"><label>Нова парола</label><input th:field="*{password}" type="password" required minlength="6"><div class="field-error" th:errors="*{password}"></div></div><div class="form-row"><label>Повтори парола</label><input th:field="*{confirmPassword}" type="password" required minlength="6"><div class="field-error" th:errors="*{confirmPassword}"></div></div><button class="btn primary" style="width:100%">Смени парола</button></form></div></div>
+
+<script>
+    const cart = new Map();
+    const favorites = new Set(JSON.parse(localStorage.getItem('eventoraFavorites') || '[]'));
+    let favoriteOnly = false;
+    const recent = new Map(JSON.parse(localStorage.getItem('eventoraRecent') || '[]'));
+    const compareEvents = new Map();
+    const eventRatings = JSON.parse(localStorage.getItem('eventoraRatings') || '{}');
+    let pendingReminder = null;
+    let pendingPriceAlert = null;
+
+    function getPoints(){ return Number(localStorage.getItem('eventoraPoints') || '0'); }
+    function setPoints(value){ localStorage.setItem('eventoraPoints', String(Math.max(0, Math.floor(value)))); renderPoints(); }
+    function getPointHistory(){ return JSON.parse(localStorage.getItem('eventoraPointHistory') || '[]'); }
+    function savePointHistory(history){ localStorage.setItem('eventoraPointHistory', JSON.stringify(history.slice(0,20))); }
+    function addPointEntry(amount, title){
+        const history = getPointHistory();
+        history.unshift({amount, title, date: new Date().toLocaleDateString('bg-BG')});
+        savePointHistory(history);
+        setPoints(getPoints() + amount);
+    }
+    function pointsLevel(points){
+        if(points >= 300) return 'Gold';
+        if(points >= 100) return 'Silver';
+        return 'Bronze';
+    }
+    function renderPoints(){
+        const points = getPoints();
+        ['headerPoints','pointsMenuCount','profilePoints','pointsBalance'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=points; });
+        const level=document.getElementById('pointsLevel'); if(level) level.textContent=pointsLevel(points);
+        const next = points < 100 ? 100 : (points < 300 ? 300 : 500);
+        const prev = points < 100 ? 0 : (points < 300 ? 100 : 300);
+        const progress = Math.min(100, Math.max(0, ((points-prev)/(next-prev))*100));
+        const bar=document.getElementById('pointsProgress'); if(bar) bar.style.width=progress+'%';
+        const nextText=document.getElementById('pointsNextReward'); if(nextText) nextText.textContent = points >= 300 ? 'Gold ниво · можеш да използваш точки за отстъпки.' : 'Още ' + Math.max(0,next-points) + ' т. до следващото ниво.';
+        const info=document.getElementById('usePointsInfo'); if(info) info.textContent='Налични: '+points+' т.';
+        const checkbox=document.getElementById('usePointsDiscount'); if(checkbox){ checkbox.disabled = points < 100; if(points < 100) checkbox.checked = false; }
+        const list=document.getElementById('pointsHistoryList');
+        if(list){
+            const history=getPointHistory();
+            if(history.length===0){ list.innerHTML='<div class="empty">Все още няма движение по точките.</div>'; }
+            else{ list.innerHTML=history.map(i=>`<div class="points-item"><div>${i.title}<small>${i.date}</small></div><span class="${i.amount>=0?'points-plus':'points-minus'}">${i.amount>=0?'+':''}${i.amount} т.</span></div>`).join(''); }
+        }
+    }
+    function showPointsPanel(e){
+        if(e) e.preventDefault();
+        const panel=document.getElementById('pointsPanel');
+        if(panel){ panel.classList.add('active'); panel.scrollIntoView({behavior:'smooth',block:'start'}); }
+        renderPoints();
+    }
+
+    function currentDiscountPercent(){
+        const code = (document.getElementById('promoCode')?.value || '').trim().toUpperCase();
+        if(!code) return 0;
+        if(code === 'PROMO10') return 10;
+        if(code === 'STUDENT15') return 15;
+        if(code === 'VIP20') return 20;
+        return -1;
+    }
+    function applyPromoCode(){
+        const discount = currentDiscountPercent();
+        const text = document.getElementById('promoText');
+        if(discount === -1){ text.textContent = 'Невалиден промо код.'; text.style.color = '#b1162b'; }
+        else if(discount === 0){ text.textContent = 'Въведи промо код, ако имаш такъв.'; text.style.color = '#687285'; }
+        else{ text.textContent = 'Промо кодът е приложен: -' + discount + '%'; text.style.color = '#087645'; }
+        renderCart();
+    }
+    function toggleFavorite(btn){
+        const id = btn.dataset.id;
+        if(favorites.has(id)) favorites.delete(id); else favorites.add(id);
+        localStorage.setItem('eventoraFavorites', JSON.stringify([...favorites]));
+        updateFavorites();
+    }
+    function updateFavorites(){
+        const existingIds = new Set([...document.querySelectorAll('.favorite-btn')].map(btn => btn.dataset.id).filter(Boolean));
+        let changed = false;
+        [...favorites].forEach(id => {
+            if(!existingIds.has(id)){
+                favorites.delete(id);
+                changed = true;
+            }
+        });
+        if(changed){
+            localStorage.setItem('eventoraFavorites', JSON.stringify([...favorites]));
+        }
+        document.querySelectorAll('.favorite-btn').forEach(btn=>{
+            const active = favorites.has(btn.dataset.id);
+            btn.classList.toggle('active', active);
+            btn.textContent = active ? '★ Запазено' : '☆ Любими';
+        });
+        const favMenu=document.getElementById('favoriteMenuCount'); if(favMenu) favMenu.textContent=favorites.size;
+        const favStats=document.getElementById('favoriteStats'); if(favStats) favStats.textContent=favorites.size;
+    }
+    function openModal(id){ closeModals(); document.getElementById(id).classList.add('active'); }
+    function closeModals(){ document.querySelectorAll('.modal-backdrop').forEach(m=>m.classList.remove('active')); }
+    function switchModal(from,to){ document.getElementById(from).classList.remove('active'); document.getElementById(to).classList.add('active'); }
+    document.querySelectorAll('.modal-backdrop').forEach(b=>b.addEventListener('click',e=>{ if(e.target===b) closeModals(); }));
+
+    function isLocalPreview(){ return window.location.protocol === 'file:'; }
+    function addToCart(btn){
+        const id = btn.dataset.id || 'event-1';
+        const title = btn.dataset.title || 'Билет за събитие';
+        const price = Number(btn.dataset.price || 75);
+        const available = Number(btn.dataset.seats || 0);
+        if (available <= 0) { alert('Това събитие е разпродадено.'); return; }
+        const qtyInput = document.getElementById('qty-' + id) || btn.closest('.card').querySelector('.qty');
+        let qty = Math.max(1, Number((qtyInput && qtyInput.value) || 1));
+        qty = Math.min(qty, 8);
+        const current = cart.get(id) || {id,title,price,qty:0,available};
+        if (current.qty + qty > available) {
+            alert('Няма достатъчно свободни билети. Можеш да добавиш общо до ' + available + ' билета за това събитие.');
+            return;
+        }
+        current.qty += qty;
+        current.available = available;
+        cart.set(id,current);
+        renderCart();
+        scrollToCart();
+    }
+    function removeItem(id){ cart.delete(id); renderCart(); }
+    function changeCartQty(id, delta){
+        const item = cart.get(id);
+        if(!item) return;
+        const next = item.qty + delta;
+        if(next <= 0){ cart.delete(id); renderCart(); return; }
+        if(next > item.available){ alert('Няма повече свободни билети за това събитие.'); return; }
+        item.qty = next;
+        cart.set(id,item);
+        renderCart();
+    }
+    function clearCart(){ if(cart.size && confirm('Да изчистя ли всички билети от кошницата?')){ cart.clear(); renderCart(); } }
+    function toggleCart(){
+        const box = document.getElementById('cart');
+        const btn = document.getElementById('cartToggle');
+        const minimized = box.classList.toggle('minimized');
+        btn.textContent = minimized ? '+' : '−';
+        btn.setAttribute('aria-label', minimized ? 'Отвори кошницата' : 'Минимизирай кошницата');
+    }
+    function openCart(){
+        const box = document.getElementById('cart');
+        const btn = document.getElementById('cartToggle');
+        box.classList.remove('minimized');
+        if(btn){ btn.textContent='−'; btn.setAttribute('aria-label','Минимизирай кошницата'); }
+    }
+    function renderCart(){
+        const holder=document.getElementById('cartItems'), fields=document.getElementById('checkoutFields'); holder.innerHTML=''; fields.innerHTML='';
+        let count=0,total=0;
+        if(cart.size===0){ holder.className='empty'; holder.textContent='Кошницата е празна.'; }
+        else{ holder.className=''; cart.forEach(item=>{ count+=item.qty; total+=item.qty*item.price; const row=document.createElement('div'); row.className='cart-item'; row.innerHTML=`<div><b>${item.title}</b><span class="muted">${item.qty} × €${item.price.toFixed(2)}</span></div><div class="cart-line-actions"><button class="mini-btn" type="button" onclick="changeCartQty('${item.id}',-1)">−</button><button class="mini-btn" type="button" onclick="changeCartQty('${item.id}',1)">+</button><button class="mini-btn" type="button" onclick="removeItem('${item.id}')">×</button></div>`; holder.appendChild(row); fields.insertAdjacentHTML('beforeend', `<input type="hidden" name="eventIds" value="${item.id}"><input type="hidden" name="quantities" value="${item.qty}">`); }); }
+        const discount = currentDiscountPercent();
+        const validDiscount = discount > 0 ? discount : 0;
+        const discountAmount = total * validDiscount / 100;
+        const insuranceEnabled = document.getElementById('ticketInsurance')?.checked;
+        const insuranceTotal = insuranceEnabled ? count * 2.99 : 0;
+        const pointsBalance = getPoints();
+        const usePoints = document.getElementById('usePointsDiscount')?.checked && pointsBalance >= 100 && total > 0;
+        const pointsDiscount = usePoints ? Math.min(10, Math.max(0, total - discountAmount + insuranceTotal)) : 0;
+        const finalTotal = total - discountAmount + insuranceTotal - pointsDiscount;
+        const loyalty = Math.floor(finalTotal);
+        const loyaltyHolder = document.getElementById('loyaltyPoints');
+        if(loyaltyHolder) loyaltyHolder.textContent = loyalty + ' т. за тази поръчка';
+        document.querySelectorAll('.cart-count').forEach(el=>el.textContent=count); document.getElementById('cartMini').textContent=count+' билета'; document.getElementById('cartTotal').textContent='€'+finalTotal.toFixed(2); const cartStats=document.getElementById('cartStats'); if(cartStats) cartStats.textContent=count;
+        const pointsRewardLine=document.getElementById('pointsRewardLine'); if(pointsRewardLine) pointsRewardLine.style.display = pointsDiscount > 0 ? 'flex' : 'none';
+        const pointsRewardValue=document.getElementById('pointsRewardValue'); if(pointsRewardValue) pointsRewardValue.textContent='-€'+pointsDiscount.toFixed(2);
+        document.getElementById('promoCodeHidden').value = validDiscount > 0 ? document.getElementById('promoCode').value.trim().toUpperCase() : '';
+        const usePointsHidden=document.getElementById('usePointsHidden'); if(usePointsHidden) usePointsHidden.value = pointsDiscount > 0 ? 'true' : 'false';
+        const pointsEarnedHidden=document.getElementById('pointsEarnedHidden'); if(pointsEarnedHidden) pointsEarnedHidden.value = loyalty;
+        document.getElementById('discountLine').style.display = validDiscount > 0 ? 'flex' : 'none';
+        document.getElementById('discountValue').textContent = '-€' + discountAmount.toFixed(2) + (insuranceTotal > 0 ? ' · защита +€' + insuranceTotal.toFixed(2) : '');
+    }
+    document.getElementById('checkoutForm').addEventListener('submit',function(e){
+        if(cart.size===0){ e.preventDefault(); alert('Кошницата е празна.'); return; }
+        for (const item of cart.values()) {
+            if (item.qty > item.available) {
+                e.preventDefault();
+                alert('Няма достатъчно свободни билети за: ' + item.title);
+                return;
+            }
+        }
+        const earned = Number(document.getElementById('pointsEarnedHidden')?.value || 0);
+        const used = document.getElementById('usePointsHidden')?.value === 'true';
+        if(used){ addPointEntry(-100, 'Използвана отстъпка с точки'); }
+        if(earned > 0){ addPointEntry(earned, 'Покупка на билети'); }
+        if(isLocalPreview()){ e.preventDefault(); alert('Кошницата работи. За реална поръчка стартирай Spring Boot и отвори http://localhost:8080/visualization'); }
+    });
+    document.querySelectorAll('form[action^="/"]').forEach(form=>{ form.addEventListener('submit', function(e){ if(isLocalPreview()){ e.preventDefault(); alert('За регистрация, вход, имейл код и реална поръчка стартирай Spring Boot и отвори http://localhost:8080/visualization'); } }); });
+    function scrollToCart(){ openCart(); document.getElementById('cart').scrollIntoView({behavior:'smooth',block:'center'}); }
+    function setCategory(category){ document.getElementById('categoryFilter').value = category; filterEvents(); document.getElementById('events').scrollIntoView({behavior:'smooth'}); }
+    function filterEvents(){
+        const q=document.getElementById('searchInput').value.toLowerCase();
+        const c=document.getElementById('categoryFilter').value;
+        let visible=0;
+        document.querySelectorAll('.event-card').forEach(card=>{
+            const okTitle=card.dataset.title.toLowerCase().includes(q);
+            const okCat=c==='all'||card.dataset.category===c;
+            const okFav=!favoriteOnly || favorites.has(card.querySelector('.favorite-btn')?.dataset.id);
+            const show=okTitle&&okCat&&okFav;
+            card.style.display=show?'grid':'none';
+            if(show) visible++;
+        });
+        const noResults=document.getElementById('noResults');
+        if(noResults){
+            if(favoriteOnly && favorites.size === 0){
+                noResults.textContent = 'Все още нямаш любими събития. Натисни „☆ Любими“ на събитие, за да го запазиш тук.';
+            }else if(favoriteOnly){
+                noResults.textContent = 'Няма любими събития, които отговарят на текущото търсене.';
+            }else{
+                noResults.textContent = 'Няма намерени събития по избраните филтри. Опитай с друга категория или изчисти филтрите.';
+            }
+            noResults.style.display=visible===0?'block':'none';
+        }
+    }
+    function showFavoritesFromMenu(event){
+        if(event) event.preventDefault();
+        favoriteOnly = true;
+        const search=document.getElementById('searchInput'); if(search) search.value='';
+        const category=document.getElementById('categoryFilter'); if(category) category.value='all';
+        const btn=document.getElementById('favoriteFilter');
+        if(btn){ btn.classList.add('active'); btn.textContent='★ Показани любими'; }
+        updateFavorites();
+        filterEvents();
+        document.getElementById('events').scrollIntoView({behavior:'smooth'});
+    }
+    function toggleFavoriteFilter(){
+        favoriteOnly=!favoriteOnly;
+        const btn=document.getElementById('favoriteFilter');
+        btn.classList.toggle('active', favoriteOnly);
+        btn.textContent = favoriteOnly ? '★ Показани любими' : '★ Покажи любими';
+        if(favoriteOnly){ const search=document.getElementById('searchInput'); if(search) search.value=''; const category=document.getElementById('categoryFilter'); if(category) category.value='all'; }
+        filterEvents();
+    }
+    function sortEvents(){
+        const grid=document.querySelector('.grid');
+        const cards=[...document.querySelectorAll('.event-card')];
+        const mode=document.getElementById('sortFilter')?.value || 'date';
+        cards.sort((a,b)=>{
+            if(mode==='priceAsc') return Number(a.dataset.price)-Number(b.dataset.price);
+            if(mode==='priceDesc') return Number(b.dataset.price)-Number(a.dataset.price);
+            if(mode==='seats') return Number(b.dataset.seats)-Number(a.dataset.seats);
+            return String(a.dataset.date).localeCompare(String(b.dataset.date));
+        });
+        cards.forEach(card=>grid.appendChild(card));
+        filterEvents();
+    }
+    function clearFilters(){
+        document.getElementById('searchInput').value='';
+        const secondary=document.getElementById('secondarySearch'); if(secondary) secondary.value='';
+        document.getElementById('categoryFilter').value='all';
+        document.getElementById('sortFilter').value='date';
+        favoriteOnly=false;
+        const favBtn=document.getElementById('favoriteFilter'); if(favBtn){ favBtn.classList.remove('active'); favBtn.textContent='★ Покажи любими'; }
+        sortEvents();
+    }
+    function shareEvent(btn){
+        const title=btn.dataset.title || 'събитие';
+        if(navigator.share){ navigator.share({title:'Eventora', text:'Виж това събитие: '+title, url:window.location.href}).catch(()=>{}); }
+        else { navigator.clipboard?.writeText(window.location.href); alert('Линкът към страницата е копиран.'); }
+    }
+    function subscribeNewsletter(e){
+        e.preventDefault();
+        const email=document.getElementById('newsletterEmail').value;
+        alert('Благодарим! Ще получаваш известия за нови събития на '+email+'.');
+        e.target.reset();
+    }
+
+    function toggleTheme(){
+        const dark = !document.body.classList.contains('dark-mode');
+        document.body.classList.toggle('dark-mode', dark);
+        localStorage.setItem('eventoraTheme', dark ? 'dark' : 'light');
+        const btn=document.getElementById('themeToggle'); if(btn) btn.textContent = dark ? '☀️' : '🌙';
+    }
+
+    function toggleCompare(btn){
+        const data=btn.dataset;
+        if(compareEvents.has(data.id)){ compareEvents.delete(data.id); btn.classList.remove('active'); }
+        else {
+            if(compareEvents.size >= 3){ alert('Можеш да сравняваш до 3 събития едновременно.'); return; }
+            compareEvents.set(data.id,{id:data.id,title:data.title,category:data.category,price:Number(data.price||0),seats:Number(data.seats||0),location:data.location,date:data.dateLabel});
+            btn.classList.add('active');
+        }
+        renderCompareBar();
+    }
+    function renderCompareBar(){
+        const bar=document.getElementById('compareBar');
+        const list=document.getElementById('compareList');
+        if(!bar || !list) return;
+        list.innerHTML='';
+        if(compareEvents.size===0){ bar.classList.remove('active'); return; }
+        bar.classList.add('active');
+        compareEvents.forEach(item=>{ const pill=document.createElement('span'); pill.className='compare-pill'; pill.textContent=item.title; list.appendChild(pill); });
+    }
+    function clearCompare(){
+        compareEvents.clear();
+        document.querySelectorAll('.compare-btn').forEach(b=>b.classList.remove('active'));
+        renderCompareBar();
+        const content=document.getElementById('compareContent'); if(content) content.className='empty', content.textContent='Няма избрани събития.';
+    }
+    function openCompare(){
+        const content=document.getElementById('compareContent');
+        if(compareEvents.size===0){ content.className='empty'; content.textContent='Няма избрани събития. Натисни „Сравни“ върху няколко събития.'; openModal('compareModal'); return; }
+        content.className='';
+        let html='<table class="compare-table"><thead><tr><th>Събитие</th><th>Категория</th><th>Дата</th><th>Локация</th><th>Цена</th><th>Места</th></tr></thead><tbody>';
+        compareEvents.forEach(i=>{ html+=`<tr><td><b>${i.title}</b></td><td>${i.category||'-'}</td><td>${i.date||'-'}</td><td>${i.location||'-'}</td><td>€${i.price.toFixed(2)}</td><td>${i.seats}</td></tr>`; });
+        html+='</tbody></table>';
+        content.innerHTML=html;
+        openModal('compareModal');
+    }
+    function downloadCalendar(btn){
+        const data=btn.dataset;
+        const start=new Date(data.date);
+        const end=new Date(start.getTime()+2*60*60*1000);
+        const fmt=d=>d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+        const text=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Eventora//BG','BEGIN:VEVENT','UID:'+Date.now()+'@eventora','DTSTAMP:'+fmt(new Date()),'DTSTART:'+fmt(start),'DTEND:'+fmt(end),'SUMMARY:'+escapeIcs(data.title||'Eventora event'),'LOCATION:'+escapeIcs(data.location||''),'DESCRIPTION:'+escapeIcs(data.description||'Билетно събитие от Eventora'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+        const blob=new Blob([text],{type:'text/calendar;charset=utf-8'});
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=(data.title||'eventora-event').replace(/[^a-z0-9а-яА-Я]+/gi,'-')+'.ics';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }
+    function escapeIcs(v){
+        return String(v)
+            .replace(/\\/g, '\\\\')
+            .replace(/;/g, '\\;')
+            .replace(/,/g, '\\,')
+            .replace(/\r?\n/g, '\\n');
+    }
+    function openReminder(btn){
+        pendingReminder={id:btn.dataset.id,title:btn.dataset.title,date:btn.dataset.dateLabel};
+        document.getElementById('reminderText').textContent='Напомняне за „'+pendingReminder.title+'“ · '+pendingReminder.date;
+        openModal('reminderModal');
+    }
+    function saveReminder(when){
+        if(!pendingReminder) return;
+        const reminders=JSON.parse(localStorage.getItem('eventoraReminders') || '[]');
+        reminders.push({...pendingReminder,when});
+        localStorage.setItem('eventoraReminders', JSON.stringify(reminders));
+        closeModals();
+        alert('Напомнянето е записано: '+pendingReminder.title+' · '+when);
+    }
+    function rateEvent(btn, rating){
+        const row=btn.closest('.rating-row');
+        const id=row?.dataset.id;
+        if(!id) return;
+        eventRatings[id]=rating;
+        localStorage.setItem('eventoraRatings', JSON.stringify(eventRatings));
+        paintRating(row, rating);
+    }
+    function paintRating(row, rating){
+        row.querySelectorAll('.star-btn').forEach((b,i)=>b.classList.toggle('active', i<rating));
+    }
+    function initRatings(){
+        document.querySelectorAll('.rating-row').forEach(row=>paintRating(row, Number(eventRatings[row.dataset.id] || 0)));
+    }
+    function renderSeatMap(available, capacity){
+        const holder=document.getElementById('seatMap');
+        if(!holder) return;
+        holder.innerHTML='';
+        const total=40;
+        const ratio=capacity ? Math.max(0, Math.min(1, available/capacity)) : .5;
+        const free=Math.round(total*ratio);
+        for(let i=0;i<total;i++){
+            const s=document.createElement('span');
+            s.className='seat '+(i>=free?'taken':(i<Math.min(4,free)?'selected':''));
+            holder.appendChild(s);
+        }
+    }
+
+    function toggleGiftMessage(){
+        const box=document.getElementById('giftMessageBox');
+        const checked=document.getElementById('giftTicket')?.checked;
+        if(box) box.classList.toggle('active', !!checked);
+    }
+    function openPriceAlert(btn){
+        pendingPriceAlert={title:btn.dataset.title || 'събитие', price:Number(btn.dataset.price || 0)};
+        document.getElementById('priceAlertTitle').textContent='Текуща цена за „'+pendingPriceAlert.title+'“: €'+pendingPriceAlert.price.toFixed(2)+'.';
+        document.getElementById('priceAlertValue').value=Math.max(1, Math.floor(pendingPriceAlert.price * .85));
+        openModal('priceAlertModal');
+    }
+    function savePriceAlert(){
+        if(!pendingPriceAlert) return;
+        const value=Number(document.getElementById('priceAlertValue').value || 0);
+        if(value<=0){ alert('Въведи валидна цена.'); return; }
+        const alerts=JSON.parse(localStorage.getItem('eventoraPriceAlerts') || '[]');
+        alerts.push({...pendingPriceAlert, target:value, createdAt:new Date().toISOString()});
+        localStorage.setItem('eventoraPriceAlerts', JSON.stringify(alerts));
+        closeModals();
+        alert('Ценовият сигнал е записан за „'+pendingPriceAlert.title+'“ при цена €'+value.toFixed(2)+'.');
+    }
+
+    function initTheme(){
+        const dark = localStorage.getItem('eventoraTheme') === 'dark';
+        document.body.classList.toggle('dark-mode', dark);
+        const btn=document.getElementById('themeToggle'); if(btn) btn.textContent = dark ? '☀️' : '🌙';
+    }
+    function openDetails(btn){
+        const data = btn.dataset;
+        document.getElementById('detailTitle').textContent = data.title || 'Събитие';
+        document.getElementById('detailDescription').textContent = data.description || 'Няма описание.';
+        document.getElementById('detailLocation').textContent = data.location || '-';
+        document.getElementById('detailDate').textContent = data.dateLabel || '-';
+        document.getElementById('detailSeats').textContent = (data.seats || 0) + ' свободни места от ' + (data.capacity || '-');
+        document.getElementById('detailPrice').textContent = '€' + Number(data.price || 0).toFixed(2);
+        const addBtn=document.getElementById('detailAddBtn');
+        addBtn.onclick = () => { addToCart(btn); closeModals(); };
+        addBtn.disabled = Number(data.seats || 0) <= 0;
+        addBtn.textContent = addBtn.disabled ? 'Разпродадено' : 'Добави билет';
+        renderCountdown(data.date);
+        renderSeatMap(Number(data.seats || 0), Number(data.capacity || 0));
+        rememberRecent(data);
+        openModal('detailsModal');
+    }
+    function renderCountdown(dateValue){
+        const holder=document.getElementById('detailCountdown');
+        const target=new Date(dateValue);
+        const diff=Math.max(0,target.getTime()-Date.now());
+        const days=Math.floor(diff/86400000);
+        const hours=Math.floor(diff/3600000)%24;
+        const mins=Math.floor(diff/60000)%60;
+        const secs=Math.floor(diff/1000)%60;
+        holder.innerHTML=`<div class="count-box"><b>${days}</b><span>дни</span></div><div class="count-box"><b>${hours}</b><span>часа</span></div><div class="count-box"><b>${mins}</b><span>мин</span></div><div class="count-box"><b>${secs}</b><span>сек</span></div>`;
+    }
+    function rememberRecent(data){
+        if(!data.id) return;
+        recent.delete(data.id);
+        recent.set(data.id,{id:data.id,title:data.title,category:data.category,price:data.price,date:data.dateLabel});
+        while(recent.size>6){ recent.delete(recent.keys().next().value); }
+        localStorage.setItem('eventoraRecent', JSON.stringify([...recent]));
+        renderRecent();
+    initRatings();
+    renderCompareBar();
+    }
+    function renderRecent(){
+        const section=document.getElementById('recentSection');
+        const list=document.getElementById('recentList');
+        if(!section || !list) return;
+        list.innerHTML='';
+        if(recent.size===0){ section.classList.remove('active'); return; }
+        section.classList.add('active');
+        [...recent.values()].reverse().forEach(item=>{
+            const div=document.createElement('div');
+            div.className='recent-item';
+            div.innerHTML=`<b>${item.title}</b><span>${item.category} · ${item.date}</span><br><span>от €${Number(item.price || 0).toFixed(2)}</span>`;
+            div.onclick=()=>{
+                const card=[...document.querySelectorAll('.event-card')].find(c=>c.querySelector('.favorite-btn')?.dataset.id===item.id);
+                if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.animate([{transform:'scale(1)'},{transform:'scale(1.015)'},{transform:'scale(1)'}],{duration:650}); }
+            };
+            list.appendChild(div);
+        });
+    }
+    function clearRecent(){ recent.clear(); localStorage.removeItem('eventoraRecent'); renderRecent(); }
+
+    initTheme();
+    favoriteOnly = false;
+    const initialFavBtn = document.getElementById('favoriteFilter');
+    if(initialFavBtn){ initialFavBtn.classList.remove('active'); initialFavBtn.textContent='★ Покажи любими'; }
+    const initialSearch = document.getElementById('searchInput'); if(initialSearch) initialSearch.value='';
+    const initialCategory = document.getElementById('categoryFilter'); if(initialCategory) initialCategory.value='all';
+    sortEvents();
+    updateFavorites();
+    renderPoints();
+    renderCart();
+    renderRecent();
+    initRatings();
+    renderCompareBar();
+    const mode=document.body.dataset.authMode; if(mode==='login') openModal('loginModal'); if(mode==='register') openModal('registerModal'); if(mode==='forgot') openModal('forgotModal'); if(mode==='verifyCode') openModal('verifyCodeModal'); if(mode==='reset') openModal('resetModal');
+</script>
+</body>
+</html>

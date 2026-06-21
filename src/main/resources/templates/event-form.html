@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${mode == 'edit' ? 'Редакция' : 'Ново събитие'}">Събитие</title>
+    <style>
+        body{font-family:Inter,Arial,sans-serif;margin:0;background:#f5f7fb;color:#141927}.top{background:#071020;color:#fff;padding:18px 28px;display:flex;justify-content:space-between}.top a{color:#fff;text-decoration:none;font-weight:900}.wrap{max-width:760px;margin:32px auto;padding:0 20px}.card{background:#fff;border-radius:22px;padding:26px;box-shadow:0 10px 30px rgba(13,23,48,.08)}label{display:block;font-weight:900;margin:14px 0 7px}input,select,textarea{width:100%;padding:13px;border:1px solid #dce2ee;border-radius:12px;font-size:15px;box-sizing:border-box}textarea{min-height:120px}.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-block;margin-top:16px}.primary{background:#00d084;color:#071020}.dark{background:#111936;color:#fff}.error{color:#c01832;font-weight:800;font-size:13px;margin-top:5px}.alert{background:#fff0f2;color:#b1162b;padding:12px 14px;border-radius:12px;font-weight:800}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    </style>
+</head>
+<body>
+<div class="top"><strong>Eventora Admin</strong><a href="/admin/events">Назад</a></div>
+<main class="wrap">
+    <div class="card">
+        <h1 th:text="${mode == 'edit' ? 'Редакция на събитие' : 'Добавяне на събитие'}">Форма</h1>
+        <div class="alert" th:if="${error}" th:text="${error}">Error</div>
+        <form method="post" th:object="${eventDto}" th:action="${mode == 'edit'} ? @{/admin/events/{id}/edit(id=${eventId})} : @{/admin/events/create}">
+            <label>Заглавие</label>
+            <input th:field="*{title}" placeholder="Напр. Sofia Music Night">
+            <div class="error" th:errors="*{title}"></div>
+
+            <div class="row"><div><label>Зала</label><select th:field="*{venueId}"><option value="">Избери зала</option><option th:each="venue : ${venues}" th:value="${venue.id}" th:text="${venue.displayName()}">Venue</option></select><div class="error" th:errors="*{venueId}"></div></div><div><label>Категория</label><select th:field="*{category}"><option value="">Избери</option><option>Концерт</option><option>Театър</option><option>Спорт</option><option>Комедия</option><option>Фестивал</option><option>Конференция</option><option>Детско</option></select><div class="error" th:errors="*{category}"></div></div></div>
+
+            <div class="row"><div><label>Цена</label><input th:field="*{price}" type="number" step="0.01" min="1"></div><div><label>Свободни места</label><input th:field="*{availableSeats}" type="number" min="1"></div></div>
+            <div class="error" th:errors="*{price}"></div><div class="error" th:errors="*{availableSeats}"></div>
+
+            <label>Дата и час</label>
+            <input th:field="*{startsAt}" type="datetime-local">
+            <div class="error" th:errors="*{startsAt}"></div>
+
+            <label>Описание</label>
+            <textarea th:field="*{description}" placeholder="Кратко описание на събитието..."></textarea>
+            <div class="error" th:errors="*{description}"></div>
+
+            <button class="btn primary" type="submit">Запази</button>
+            <a class="btn dark" href="/admin/events">Отказ</a>
+        </form>
+    </div>
+</main>
+</body>
+</html>

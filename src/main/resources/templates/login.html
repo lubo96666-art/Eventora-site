@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Вход</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav class="top-nav"><a href="/visualization">Eventora</a><a href="/register">Регистрация</a></nav>
+<main class="form">
+    <h1>Вход</h1>
+    <p class="error" th:if="${error}" th:text="${error}"></p>
+    <form method="post" action="/login" th:object="${loginDto}">
+        <label>Имейл<input type="email" th:field="*{email}" placeholder="you@example.com"></label>
+        <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+        <label>Парола<input type="password" th:field="*{password}" placeholder="******"></label>
+        <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
+        <button type="submit">Вход</button>
+    </form>
+    <div class="links"><a href="/forgot-password">Забравена парола?</a><a href="/register">Нямам профил</a></div>
+</main>
+</body>
+</html>

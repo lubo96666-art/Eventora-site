@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Електронен билет | Eventora</title>
+    <style>
+        *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#233a78,#071020 55%,#040711);color:#121827;min-height:100vh}.top{max-width:1080px;margin:0 auto;padding:22px;color:#fff;display:flex;justify-content:space-between;align-items:center}.top a{color:#fff;text-decoration:none;font-weight:900}.wrap{max-width:940px;margin:10px auto 50px;padding:0 20px}.ticket{background:#fff;border-radius:30px;overflow:hidden;box-shadow:0 28px 90px rgba(0,0,0,.38);display:grid;grid-template-columns:1.45fr .8fr;border:1px solid rgba(255,255,255,.16)}.main{padding:34px}.side{background:linear-gradient(160deg,#071020,#172a5a);color:#fff;padding:30px;display:flex;flex-direction:column;justify-content:space-between;position:relative}.brand{font-size:28px;font-weight:950;letter-spacing:-1px}.brand span{color:#00d084}.label{font-size:12px;text-transform:uppercase;letter-spacing:2px;font-weight:900;color:#687285}.side .label{color:#9fb0d0}.title{font-size:38px;line-height:1.05;margin:14px 0 22px;letter-spacing:-1.5px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:24px}.info{border-top:1px solid #e7ecf5;padding-top:13px}.info strong{display:block;font-size:17px;margin-top:6px}.status{display:inline-block;background:#eafff4;color:#067640;border-radius:999px;padding:10px 14px;font-weight:950}.qr{width:170px;height:170px;background:#fff;border-radius:18px;margin:24px auto;padding:12px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.qr i{background:#0b1020;border-radius:2px}.qr i:nth-child(2n){opacity:.18}.qr i:nth-child(3n){opacity:.55}.qr i:nth-child(5n){opacity:.85}.code{text-align:center;font-size:13px;letter-spacing:1px;font-weight:900;color:#d6def2;word-break:break-all}.total{font-size:34px;font-weight:950;margin-top:6px}.note{background:#f6f8fc;border-radius:18px;padding:16px;margin-top:24px;color:#596477;line-height:1.5}.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:900;cursor:pointer;background:#00d084;color:#06120c;text-decoration:none}.btn.dark{background:#141b32;color:#fff}@media(max-width:760px){.ticket{grid-template-columns:1fr}.title{font-size:30px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;gap:12px;flex-direction:column}}@media print{body{background:#fff}.top,.btns{display:none}.wrap{margin:0;max-width:none}.ticket{box-shadow:none;border:1px solid #ddd}}
+    </style>
+</head>
+<body>
+<header class="top">
+    <div class="brand">Eventora<span>.</span></div>
+    <a href="/my-tickets">← Назад към моите билети</a>
+</header>
+<main class="wrap">
+    <section class="ticket">
+        <div class="main">
+            <span class="status">VALID · Електронен билет</span>
+            <h1 class="title" th:text="${order.event.title}">Event title</h1>
+            <div class="grid">
+                <div class="info"><div class="label">Дата и час</div><strong th:text="${#temporals.format(order.event.startsAt,'dd MMMM yyyy, HH:mm')}">18 July 2026, 20:00</strong></div>
+                <div class="info"><div class="label">Място</div><strong th:text="${order.event.location}">Sofia Arena</strong></div>
+                <div class="info"><div class="label">Притежател</div><strong th:text="${username}">ivan</strong></div>
+                <div class="info"><div class="label">Брой билети</div><strong th:text="${order.quantity}">2</strong></div>
+                <div class="info"><div class="label">Категория</div><strong th:text="${order.event.category}">Концерт</strong></div>
+                <div class="info"><div class="label">Обща цена</div><strong th:text="'€' + ${#numbers.formatDecimal(order.finalPrice,1,2)}">€120.00</strong></div>
+                <div class="info" th:if="${order.discountPercent > 0}"><div class="label">Промо код</div><strong th:text="${order.promoCode} + ' · -' + ${order.discountPercent} + '%'">PROMO10</strong></div>
+            </div>
+            <div class="note">Покажи този електронен билет на входа. QR кодът и номерът на билета са уникални за твоята поръчка. Билетът е валиден само за посоченото събитие.</div>
+            <div class="btns"><button class="btn" onclick="window.print()">Принтирай билет</button><a class="btn dark" href="/visualization">Към събитията</a></div>
+        </div>
+        <aside class="side">
+            <div>
+                <div class="label">Official Ticket</div>
+                <div class="brand">Eventora<span>.</span></div>
+                <div class="qr" aria-label="QR код">
+                    <i th:each="n : ${#numbers.sequence(1,49)}"></i>
+                </div>
+                <div class="code" th:text="'EV-' + ${#strings.substring(order.id.toString(),0,8).toUpperCase()} + '-' + ${#strings.substring(order.id.toString(),9,13).toUpperCase()}">EV-12345678-ABCD</div>
+            </div>
+            <div>
+                <div class="label">Поръчано на</div>
+                <div th:text="${#temporals.format(order.orderedAt,'dd.MM.yyyy HH:mm')}">01.06.2026</div>
+                <div class="total" th:text="'€' + ${#numbers.formatDecimal(order.finalPrice,1,2)}">€0.00</div>
+            </div>
+        </aside>
+    </section>
+</main>
+</body>
+</html>

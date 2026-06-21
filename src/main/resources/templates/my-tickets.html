@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моите билети | Eventora</title>
+    <style>
+        *{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;margin:0;background:#f5f7fb;color:#141927}.top{background:#071020;color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}.top a{color:#fff;text-decoration:none;font-weight:900}.wrap{max-width:1080px;margin:32px auto;padding:0 20px}.ticket{background:#fff;border-radius:22px;padding:20px;margin-bottom:16px;display:grid;grid-template-columns:1fr auto;gap:16px;box-shadow:0 10px 30px rgba(13,23,48,.08);border-left:8px solid #00d084}.price{font-weight:900;font-size:20px}.muted{color:#687285}.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}.summary-card{background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 24px rgba(13,23,48,.06);border:1px solid #e5ebf5}.summary-card b{display:block;font-size:28px;margin-bottom:4px}.empty{background:#fff;border-radius:18px;padding:24px;text-align:center}.btn{display:inline-block;border:0;border-radius:14px;padding:12px 18px;font-weight:900;cursor:pointer;background:#00d084;color:#06120c;text-decoration:none}.btn.dark{background:#141b32;color:#fff}.actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap}.badge{display:inline-block;background:#ecfff6;color:#087645;border-radius:999px;padding:8px 12px;font-weight:900;font-size:13px}.msg{background:#eafaf1;color:#106d3b;border-radius:14px;padding:13px 16px;font-weight:900;margin:14px 0}.btn.danger{background:#ffe8ec;color:#bc1230}.promo{font-size:13px;color:#087645;font-weight:900;margin-top:4px}
+        @media(max-width:700px){.summary{grid-template-columns:1fr}.ticket{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+    </style>
+</head>
+<body>
+<div class="top"><strong>Моите билети <span th:text="'· ' + ${ticketCount} + ' билета'">· 0 билета</span></strong><a href="/visualization">Към сайта</a></div>
+<main class="wrap">
+    <h1 th:text="'Здравей, ' + ${username}">Здравей</h1>
+    <p class="muted">Тук ще намериш всички закупени електронни билети. Можеш да отвориш билет за проверка или да откажеш поръчка преди събитието.</p>
+    <section class="summary">
+        <div class="summary-card"><b th:text="${ticketCount}">0</b><span class="muted">общо купени билета</span></div>
+        <div class="summary-card"><b th:text="${orderCount}">0</b><span class="muted">направени поръчки</span></div>
+        <div class="summary-card"><b th:text="'€' + ${#numbers.formatDecimal(totalSpent,1,2)}">€0.00</b><span class="muted">общо платено</span></div>
+    </section>
+    <div class="msg" th:if="${message}" th:text="${message}">Билетът беше отказан.</div>
+    <div class="empty" th:if="${#lists.isEmpty(orders)}">Все още нямаш закупени билети.</div>
+    <article class="ticket" th:each="order : ${orders}">
+        <div>
+            <span class="badge">VALID</span>
+            <h2 th:text="${order.event.title}">Event</h2>
+            <p class="muted" th:text="${order.event.location} + ' · ' + ${#temporals.format(order.event.startsAt,'dd.MM.yyyy HH:mm')}">info</p>
+            <p class="muted" th:text="'Поръчано на: ' + ${#temporals.format(order.orderedAt,'dd.MM.yyyy HH:mm')}">ordered</p>
+        </div>
+        <div class="actions">
+            <div>
+                <div class="price" th:text="${order.quantity} + ' билета'">1 билет</div>
+                <div class="muted" th:text="'€' + ${#numbers.formatDecimal(order.finalPrice,1,2)}">€0</div>
+                <div class="promo" th:if="${order.discountPercent > 0}" th:text="'-' + ${order.discountPercent} + '% с ' + ${order.promoCode}">promo</div>
+            </div>
+            <a class="btn" th:href="@{/my-tickets/{id}(id=${order.id})}">Виж билет</a>
+            <form method="post" th:action="@{/my-tickets/{id}/cancel(id=${order.id})}" onsubmit="return confirm('Сигурен ли си, че искаш да откажеш този билет?')">
+                <button class="btn danger" type="submit">Откажи</button>
+            </form>
+        </div>
+    </article>
+</main>
+</body>
+</html>

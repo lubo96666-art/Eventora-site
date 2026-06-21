@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Регистрация</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav class="top-nav"><a href="/visualization">Eventora</a><a href="/login">Вход</a></nav>
+<main class="form">
+    <h1>Регистрация</h1>
+    <p class="hint">След регистрация ще получиш линк за потвърждение на имейла.</p>
+    <p class="error" th:if="${error}" th:text="${error}"></p>
+    <form method="post" action="/register" th:object="${registerDto}">
+        <label>Потребителско име<input th:field="*{username}" placeholder="ivan"></label>
+        <small th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
+        <label>Имейл<input type="email" th:field="*{email}" placeholder="you@example.com"></label>
+        <small th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+        <label>Парола<input type="password" th:field="*{password}" placeholder="минимум 6 символа"></label>
+        <small th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
+        <button type="submit">Регистрирай ме</button>
+    </form>
+    <div class="links"><a href="/login">Вече имам профил</a></div>
+</main>
+</body>
+</html>
