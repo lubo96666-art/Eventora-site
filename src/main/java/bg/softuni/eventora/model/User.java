@@ -25,6 +25,8 @@ public class User {
     @Column(nullable = false)
     private String role = "USER";
 
+    private Integer loyaltyPointsSpent = 0;
+
     public UUID getId() { return id; }
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -36,4 +38,6 @@ public class User {
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public int getLoyaltyPointsSpent() { return loyaltyPointsSpent == null ? 0 : loyaltyPointsSpent; }
+    public void setLoyaltyPointsSpent(int loyaltyPointsSpent) { this.loyaltyPointsSpent = Math.max(0, loyaltyPointsSpent); }
 }

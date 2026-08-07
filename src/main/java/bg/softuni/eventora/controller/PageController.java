@@ -7,7 +7,10 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import bg.softuni.eventora.model.TicketOrder;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -27,6 +30,12 @@ public class PageController {
         return "visualization";
     }
 
+    @GetMapping("/events/{id}")
+    public String eventDetails(@PathVariable UUID id, Model model) {
+        model.addAttribute("event", eventService.getById(id));
+        return "event-details";
+    }
+
     public void addVisualizationModel(Model model, HttpSession session, String authMode) {
         model.addAttribute("events", eventService.allEvents());
         model.addAttribute("username", session.getAttribute("username"));
@@ -36,12 +45,17 @@ public class PageController {
         Object userId = session.getAttribute("userId");
         int boughtTicketsCount = userId instanceof UUID ? orderService.ticketCountForUser((UUID) userId) : 0;
         int orderCount = userId instanceof UUID ? orderService.orderCountForUser((UUID) userId) : 0;
+        int loyaltyPoints = userId instanceof UUID ? orderService.loyaltyPointsForUser((UUID) userId) : 0;
+        List<TicketOrder> loyaltyHistory = userId instanceof UUID ? orderService.ordersForUser((UUID) userId) : List.of();
         model.addAttribute("boughtTicketsCount", boughtTicketsCount);
         model.addAttribute("orderCount", orderCount);
+        model.addAttribute("loyaltyPoints", loyaltyPoints);
+        model.addAttribute("loyaltyHistory", loyaltyHistory);
         if (!model.containsAttribute("registerDto")) model.addAttribute("registerDto", new RegisterDto());
         if (!model.containsAttribute("loginDto")) model.addAttribute("loginDto", new LoginDto());
         if (!model.containsAttribute("forgotPasswordDto")) model.addAttribute("forgotPasswordDto", new ForgotPasswordDto());
         if (!model.containsAttribute("resetPasswordDto")) model.addAttribute("resetPasswordDto", new ResetPasswordDto());
         if (!model.containsAttribute("verifyCodeDto")) model.addAttribute("verifyCodeDto", new VerifyCodeDto());
+        if (!model.containsAttribute("checkoutDto")) model.addAttribute("checkoutDto", new CheckoutDto());
     }
 }

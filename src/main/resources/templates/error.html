@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${statusCode} + ' | Eventora'">Грешка | Eventora</title>
+    <style>
+        *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#233a78,#071020 58%,#040711);color:#152033}.card{width:min(620px,100%);background:#fff;border-radius:28px;padding:38px;box-shadow:0 28px 90px rgba(0,0,0,.38);text-align:center}.code{font-size:76px;font-weight:950;line-height:1;color:#00a86b}.card h1{font-size:32px;margin:14px 0 8px}.card p{color:#667085;line-height:1.55}.btn{display:inline-block;margin-top:18px;padding:13px 19px;border-radius:14px;background:#00d084;color:#06120c;text-decoration:none;font-weight:950}
+    </style>
+</head>
+<body>
+<main class="card">
+    <div class="code" th:text="${statusCode}">400</div>
+    <h1 th:text="${errorTitle}">Възникна грешка</h1>
+    <p th:text="${errorMessage}">Опитай отново.</p>
+    <a class="btn" href="/visualization">Към началната страница</a>
+</main>
+</body>
+</html>

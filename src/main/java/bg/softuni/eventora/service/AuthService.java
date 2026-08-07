@@ -1,6 +1,7 @@
 package bg.softuni.eventora.service;
 
 import bg.softuni.eventora.dto.*;
+import bg.softuni.eventora.exception.BusinessRuleException;
 import bg.softuni.eventora.model.*;
 import bg.softuni.eventora.repository.*;
 import jakarta.servlet.http.HttpSession;
@@ -26,8 +27,8 @@ public class AuthService {
     }
 
     public String register(RegisterDto dto) {
-        if (users.findByEmail(dto.getEmail()).isPresent()) throw new IllegalArgumentException("Вече има потребител с този имейл.");
-        if (users.findByUsername(dto.getUsername()).isPresent()) throw new IllegalArgumentException("Вече има потребител с това потребителско име.");
+        if (users.findByEmail(dto.getEmail()).isPresent()) throw new BusinessRuleException("Вече има потребител с този имейл.");
+        if (users.findByUsername(dto.getUsername()).isPresent()) throw new BusinessRuleException("Вече има потребител с това потребителско име.");
 
         User user = new User();
         user.setUsername(dto.getUsername());
@@ -58,10 +59,10 @@ public class AuthService {
     public User verifyCode(VerifyCodeDto dto) {
         VerificationToken verificationCode = verificationTokens
                 .findFirstByCodeAndUser_Email(dto.getCode(), dto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Невалиден код за потвърждение."));
+                .orElseThrow(() -> new BusinessRuleException("Невалиден код за потвърждение."));
 
         if (verificationCode.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Кодът е изтекъл. Регистрирай се отново или поискай нов код.");
+            throw new BusinessRuleException("Кодът е изтекъл. Регистрирай се отново или поискай нов код.");
         }
 
         User user = verificationCode.getUser();
@@ -72,8 +73,8 @@ public class AuthService {
     }
 
     public void resendVerificationCode(String email) {
-        User user = users.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Няма потребител с този имейл."));
-        if (user.isEnabled()) throw new IllegalArgumentException("Профилът вече е активиран.");
+        User user = users.findByEmail(email).orElseThrow(() -> new BusinessRuleException("Няма потребител с този имейл."));
+        if (user.isEnabled()) throw new BusinessRuleException("Профилът вече е активиран.");
 
         verificationTokens.findFirstByUser_Email(email).ifPresent(verificationTokens::delete);
         String code = generateCode();
@@ -99,9 +100,9 @@ public class AuthService {
         String identifier = dto.getEmail().trim();
         User user = users.findByEmail(identifier)
                 .or(() -> users.findByUsername(identifier))
-                .orElseThrow(() -> new IllegalArgumentException("Грешен имейл/username или парола."));
-        if (!user.isEnabled()) throw new IllegalArgumentException("Първо потвърди регистрацията от имейла си.");
-        if (!encoder.matches(dto.getPassword(), user.getPasswordHash())) throw new IllegalArgumentException("Грешен имейл/username или парола.");
+                .orElseThrow(() -> new BusinessRuleException("Грешен имейл/username или парола."));
+        if (!user.isEnabled()) throw new BusinessRuleException("Първо потвърди регистрацията от имейла си.");
+        if (!encoder.matches(dto.getPassword(), user.getPasswordHash())) throw new BusinessRuleException("Грешен имейл/username или парола.");
         session.setAttribute("userId", user.getId());
         session.setAttribute("username", user.getUsername());
         session.setAttribute("role", user.getRole());
@@ -117,9 +118,9 @@ public class AuthService {
     }
 
     public void resetPassword(ResetPasswordDto dto) {
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) throw new IllegalArgumentException("Паролите не съвпадат.");
-        PasswordResetToken token = resetTokens.findByToken(dto.getToken()).orElseThrow(() -> new IllegalArgumentException("Невалиден token."));
-        if (token.isUsed() || token.getExpiresAt().isBefore(LocalDateTime.now())) throw new IllegalArgumentException("Линкът е невалиден или изтекъл.");
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) throw new BusinessRuleException("Паролите не съвпадат.");
+        PasswordResetToken token = resetTokens.findByToken(dto.getToken()).orElseThrow(() -> new BusinessRuleException("Невалиден token."));
+        if (token.isUsed() || token.getExpiresAt().isBefore(LocalDateTime.now())) throw new BusinessRuleException("Линкът е невалиден или изтекъл.");
         User user = token.getUser(); user.setPasswordHash(encoder.encode(dto.getPassword())); users.save(user);
         token.setUsed(true); resetTokens.save(token);
     }

@@ -27,6 +27,10 @@ public class EventDto {
     private LocalDateTime startsAt;
 
     @NotBlank(message = "Избери категория.")
+    @Pattern(
+            regexp = "^(Концерт|Театър|Спорт|Комедия|Фестивал|Конференция|Детско)$",
+            message = "Избери валидна категория."
+    )
     private String category;
 
     @NotBlank(message = "Въведи описание.")

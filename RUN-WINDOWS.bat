@@ -7,5 +7,5 @@ ECHO ========================================
 echo.
 echo Otvori sled kato startira: http://localhost:8080/visualization
 echo.
-call mvn spring-boot:run
+call mvnw.cmd spring-boot:run
 pause

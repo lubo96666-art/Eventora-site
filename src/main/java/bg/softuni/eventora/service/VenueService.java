@@ -1,6 +1,7 @@
 package bg.softuni.eventora.service;
 
 import bg.softuni.eventora.model.Venue;
+import bg.softuni.eventora.exception.ResourceNotFoundException;
 import bg.softuni.eventora.repository.VenueRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,7 +18,7 @@ public class VenueService {
     public List<Venue> allVenues() { return venueRepository.findAll(); }
 
     public Venue getById(UUID id) {
-        return venueRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Залата не е намерена."));
+        return venueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Залата не е намерена."));
     }
 
     public Venue createIfMissing(String name, String city, String address, int capacity) {

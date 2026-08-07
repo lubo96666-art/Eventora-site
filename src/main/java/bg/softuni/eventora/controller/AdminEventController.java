@@ -1,6 +1,8 @@
 package bg.softuni.eventora.controller;
 
 import bg.softuni.eventora.dto.EventDto;
+import bg.softuni.eventora.exception.BusinessRuleException;
+import bg.softuni.eventora.exception.EventoraAccessDeniedException;
 import bg.softuni.eventora.model.Event;
 import bg.softuni.eventora.service.EventService;
 import bg.softuni.eventora.service.VenueService;
@@ -24,10 +26,13 @@ public class AdminEventController {
     }
 
     @GetMapping
-    public String manage(Model model, HttpSession session) {
+    public String manage(@RequestParam(required = false) String action, Model model, HttpSession session) {
         requireAdmin(session);
         model.addAttribute("events", eventService.allEvents());
         model.addAttribute("username", session.getAttribute("username"));
+        if ("created".equals(action)) model.addAttribute("message", "Събитието е създадено успешно.");
+        if ("updated".equals(action)) model.addAttribute("message", "Промените са запазени успешно.");
+        if ("deleted".equals(action)) model.addAttribute("message", "Събитието е изтрито успешно.");
         return "admin-events";
     }
 
@@ -50,8 +55,8 @@ public class AdminEventController {
         }
         try {
             eventService.createEvent(eventDto);
-            return "redirect:/admin/events";
-        } catch (IllegalArgumentException exception) {
+            return "redirect:/admin/events?action=created";
+        } catch (BusinessRuleException exception) {
             model.addAttribute("venues", venueService.allVenues());
             model.addAttribute("mode", "create");
             model.addAttribute("error", exception.getMessage());
@@ -81,8 +86,8 @@ public class AdminEventController {
         }
         try {
             eventService.updateEvent(id, eventDto);
-            return "redirect:/admin/events";
-        } catch (IllegalArgumentException exception) {
+            return "redirect:/admin/events?action=updated";
+        } catch (BusinessRuleException exception) {
             model.addAttribute("venues", venueService.allVenues());
             model.addAttribute("eventId", id);
             model.addAttribute("mode", "edit");
@@ -95,12 +100,12 @@ public class AdminEventController {
     public String delete(@PathVariable UUID id, HttpSession session) {
         requireAdmin(session);
         eventService.deleteEvent(id);
-        return "redirect:/admin/events";
+        return "redirect:/admin/events?action=deleted";
     }
 
     private void requireAdmin(HttpSession session) {
         if (!"ADMIN".equals(session.getAttribute("role"))) {
-            throw new IllegalArgumentException("Само администратор може да управлява събития.");
+            throw new EventoraAccessDeniedException("Само администратор може да управлява събития.");
         }
     }
 }

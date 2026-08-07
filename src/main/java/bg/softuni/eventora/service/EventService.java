@@ -1,11 +1,14 @@
 package bg.softuni.eventora.service;
 
 import bg.softuni.eventora.dto.EventDto;
+import bg.softuni.eventora.exception.BusinessRuleException;
+import bg.softuni.eventora.exception.ResourceNotFoundException;
 import bg.softuni.eventora.model.Event;
 import bg.softuni.eventora.model.Venue;
 import bg.softuni.eventora.repository.EventRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,21 +27,24 @@ public class EventService implements CommandLineRunner {
     public List<Event> allEvents() { return eventRepository.findAll(); }
 
     public Event getById(UUID id) {
-        return eventRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Събитието не е намерено."));
+        return eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Събитието не е намерено."));
     }
 
+    @Transactional
     public Event createEvent(EventDto dto) {
         Event event = new Event();
         copyDtoToEvent(dto, event);
         return eventRepository.save(event);
     }
 
+    @Transactional
     public Event updateEvent(UUID id, EventDto dto) {
         Event event = getById(id);
         copyDtoToEvent(dto, event);
         return eventRepository.save(event);
     }
 
+    @Transactional
     public void deleteEvent(UUID id) {
         Event event = getById(id);
         eventRepository.delete(event);
@@ -59,7 +65,7 @@ public class EventService implements CommandLineRunner {
     private void copyDtoToEvent(EventDto dto, Event event) {
         Venue venue = venueService.getById(dto.getVenueId());
         if (dto.getAvailableSeats() > venue.getCapacity()) {
-            throw new IllegalArgumentException("Свободните места не може да надвишават капацитета на залата.");
+            throw new BusinessRuleException("Свободните места не може да надвишават капацитета на залата.");
         }
         event.setTitle(dto.getTitle().trim());
         event.setVenue(venue);
@@ -71,13 +77,15 @@ public class EventService implements CommandLineRunner {
         event.setDescription(dto.getDescription().trim());
     }
 
+    @Transactional
     public void decreaseSeats(Event event, int quantity) {
-        if (quantity < 1) throw new IllegalArgumentException("Избери поне 1 билет.");
-        if (event.getAvailableSeats() < quantity) throw new IllegalArgumentException("Няма достатъчно свободни места.");
+        if (quantity < 1) throw new BusinessRuleException("Избери поне 1 билет.");
+        if (event.getAvailableSeats() < quantity) throw new BusinessRuleException("Няма достатъчно свободни места.");
         event.setAvailableSeats(event.getAvailableSeats() - quantity);
         eventRepository.save(event);
     }
 
+    @Transactional
     public void restoreSeats(Event event, int quantity) {
         if (quantity < 1) return;
         event.setAvailableSeats(event.getAvailableSeats() + quantity);
