@@ -6,6 +6,7 @@ import bg.softuni.eventora.exception.ResourceNotFoundException;
 import bg.softuni.eventora.model.Event;
 import bg.softuni.eventora.model.Venue;
 import bg.softuni.eventora.repository.EventRepository;
+import bg.softuni.eventora.repository.TicketOrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +24,9 @@ import static org.mockito.Mockito.when;
 class EventServiceTest {
 
     private final EventRepository eventRepository = mock(EventRepository.class);
+    private final TicketOrderRepository ticketOrderRepository = mock(TicketOrderRepository.class);
     private final VenueService venueService = mock(VenueService.class);
-    private final EventService eventService = new EventService(eventRepository, venueService);
+    private final EventService eventService = new EventService(eventRepository, ticketOrderRepository, venueService);
     private Venue venue;
 
     @BeforeEach
@@ -78,6 +80,20 @@ class EventServiceTest {
         when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> eventService.getById(eventId));
+    }
+
+    @Test
+    void deleteEventRejectsEventWithPurchasedTickets() {
+        UUID eventId = UUID.randomUUID();
+        Event event = new Event();
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(ticketOrderRepository.existsByEvent_Id(eventId)).thenReturn(true);
+
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class,
+                () -> eventService.deleteEvent(eventId));
+
+        assertEquals("Събитието не може да бъде изтрито, защото има закупени билети.",
+                exception.getMessage());
     }
 
     private EventDto validDto(UUID venueId) {

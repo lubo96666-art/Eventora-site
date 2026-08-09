@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface TicketOrderRepository extends JpaRepository<TicketOrder, UUID> {
     List<TicketOrder> findByUser_IdOrderByOrderedAtDesc(UUID userId);
+
+    boolean existsByEvent_Id(UUID eventId);
 }
