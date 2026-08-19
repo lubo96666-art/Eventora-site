@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import feign.FeignException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
     public String invalidArgument(IllegalArgumentException exception, Model model, HttpServletResponse response) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         return errorPage("Невалидни данни", exception.getMessage(), 400, model);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public String reviewsUnavailable(FeignException exception, Model model, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        return errorPage("Услугата за оценки не е достъпна",
+                "Стартирай Eventora Reviews на порт 8081 и опитай отново.", 503, model);
     }
 
     private String errorPage(String title, String message, int status, Model model) {
