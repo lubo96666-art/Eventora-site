@@ -13,7 +13,6 @@ public class VerificationToken {
     @Column(nullable = false)
     private String code;
 
-    // Internal UUID kept for database compatibility with older versions. It is never shown on the site.
     @Column(nullable = false, unique = true)
     private String token;
 

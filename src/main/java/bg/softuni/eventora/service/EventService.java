@@ -9,11 +9,16 @@ import bg.softuni.eventora.repository.EventRepository;
 import bg.softuni.eventora.repository.TicketOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class EventService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventService.class);
     private final EventRepository eventRepository;
     private final TicketOrderRepository ticketOrderRepository;
     private final VenueService venueService;
@@ -26,33 +31,43 @@ public class EventService {
         this.venueService = venueService;
     }
 
+    @Cacheable("events")
     public List<Event> allEvents() { return eventRepository.findAll(); }
 
+    @Cacheable(value = "event", key = "#id")
     public Event getById(UUID id) {
         return eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Събитието не е намерено."));
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public Event createEvent(EventDto dto) {
         Event event = new Event();
         copyDtoToEvent(dto, event);
-        return eventRepository.save(event);
+        Event saved = eventRepository.save(event);
+        LOGGER.info("Created event {}", saved.getId());
+        return saved;
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public Event updateEvent(UUID id, EventDto dto) {
         Event event = getById(id);
         copyDtoToEvent(dto, event);
-        return eventRepository.save(event);
+        Event saved = eventRepository.save(event);
+        LOGGER.info("Updated event {}", saved.getId());
+        return saved;
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public void deleteEvent(UUID id) {
         Event event = getById(id);
         if (ticketOrderRepository.existsByEvent_Id(id)) {
             throw new BusinessRuleException("Събитието не може да бъде изтрито, защото има закупени билети.");
         }
         eventRepository.delete(event);
+        LOGGER.info("Deleted event {}", id);
     }
 
     public EventDto toDto(Event event) {
@@ -83,18 +98,22 @@ public class EventService {
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public void decreaseSeats(Event event, int quantity) {
         if (quantity < 1) throw new BusinessRuleException("Избери поне 1 билет.");
         if (event.getAvailableSeats() < quantity) throw new BusinessRuleException("Няма достатъчно свободни места.");
         event.setAvailableSeats(event.getAvailableSeats() - quantity);
         eventRepository.save(event);
+        LOGGER.info("Reserved {} seats for event {}", quantity, event.getId());
     }
 
     @Transactional
+    @CacheEvict(value = {"events", "event"}, allEntries = true)
     public void restoreSeats(Event event, int quantity) {
         if (quantity < 1) return;
         event.setAvailableSeats(event.getAvailableSeats() + quantity);
         eventRepository.save(event);
+        LOGGER.info("Restored {} seats for event {}", quantity, event.getId());
     }
 
 }

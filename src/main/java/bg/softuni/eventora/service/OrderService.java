@@ -9,6 +9,8 @@ import bg.softuni.eventora.repository.TicketOrderRepository;
 import bg.softuni.eventora.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
@@ -19,6 +21,7 @@ import java.util.UUID;
 
 @Service
 public class OrderService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
     private static final int MAX_TICKETS_PER_EVENT = 8;
     private static final int LOYALTY_REWARD_COST = 100;
     private static final BigDecimal LOYALTY_DISCOUNT = BigDecimal.TEN;
@@ -159,6 +162,7 @@ public class OrderService {
             user.setLoyaltyPointsSpent(user.getLoyaltyPointsSpent() + LOYALTY_REWARD_COST);
             users.save(user);
         }
+        LOGGER.info("Completed checkout for user {} with {} event selections", userId, requestedTickets.size());
     }
     @Transactional
     public void cancelOrder(UUID userId, UUID orderId) {
@@ -170,6 +174,7 @@ public class OrderService {
             users.save(user);
         }
         orders.delete(order);
+        LOGGER.info("Cancelled order {} for user {}", orderId, userId);
     }
 
     private int discountPercent(String promoCode) {
