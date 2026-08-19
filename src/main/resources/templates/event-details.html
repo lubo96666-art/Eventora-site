@@ -15,5 +15,22 @@
     <article class="panel"><h2>За събитието</h2><p class="description" th:text="${event.description}">Описание</p><h2>Място</h2><p class="description" th:text="${event.venue.name} + ', ' + ${event.venue.city} + ' — ' + ${event.venue.address}">Адрес</p></article>
     <aside class="panel"><div class="facts"><div class="fact"><span>Дата и час</span><b th:text="${#temporals.format(event.startsAt,'dd MMMM yyyy, HH:mm')}">Дата</b></div><div class="fact"><span>Свободни места</span><b th:text="${event.availableSeats} + ' от ' + ${event.venue.capacity}">0</b></div><div class="fact"><span>Цена на билет</span><b class="price" th:text="'€' + ${#numbers.formatDecimal(event.price,1,2)}">€0.00</b></div></div><a class="btn" href="/visualization#events">Избери билети</a></aside>
 </main>
+<section class="panel" style="max-width:1072px;margin:0 auto 40px">
+    <h2>Оценки от посетители</h2>
+    <p th:if="${param.review}" style="color:#087645;font-weight:800">Операцията с оценката е успешна.</p>
+    <form th:if="${currentUserId != null}" th:action="@{'/events/' + ${event.id} + '/reviews'}" method="post">
+        <label>Оценка <select name="rating"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></label>
+        <label>Коментар <textarea name="comment" minlength="5" maxlength="500" required></textarea></label>
+        <button class="btn" type="submit">Публикувай оценка</button>
+    </form>
+    <p th:if="${currentUserId == null}"><a href="/login">Влез в профила си</a>, за да оставиш оценка.</p>
+    <article class="fact" th:each="review : ${reviews}" style="margin-top:14px">
+        <b th:text="${review.authorName + ' · ' + review.rating + '/5'}"></b><p th:text="${review.comment}"></p>
+        <div th:if="${currentUserId != null and currentUserId.equals(review.authorId)}">
+            <form th:action="@{'/events/' + ${event.id} + '/reviews/' + ${review.id} + '/edit'}" method="post"><select name="rating"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><input name="comment" th:value="${review.comment}" minlength="5" maxlength="500" required><button>Редактирай</button></form>
+            <form th:action="@{'/events/' + ${event.id} + '/reviews/' + ${review.id} + '/delete'}" method="post"><button>Изтрий</button></form>
+        </div>
+    </article>
+</section>
 </body>
 </html>
