@@ -6,6 +6,12 @@ import bg.softuni.eventora.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +20,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final PageController pageController;
+    private final AuthenticationManager authenticationManager;
 
-    public AuthController(AuthService authService, PageController pageController) {
+    public AuthController(AuthService authService, PageController pageController, AuthenticationManager authenticationManager) {
         this.authService = authService;
         this.pageController = pageController;
+        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("/register")
@@ -53,6 +61,10 @@ public class AuthController {
             session.setAttribute("userId", user.getId());
             session.setAttribute("username", user.getUsername());
             session.setAttribute("role", user.getRole());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), null,
+                    java.util.List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
             return "redirect:/visualization";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -86,18 +98,16 @@ public class AuthController {
         pageController.addVisualizationModel(model, session, "login");
         if (br.hasErrors()) return "visualization";
         try {
-            authService.login(loginDto, session);
+            User user = authService.login(loginDto, session);
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), loginDto.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
             return "redirect:/visualization";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             return "visualization";
         }
-    }
-
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/visualization";
     }
 
     @GetMapping("/forgot-password")

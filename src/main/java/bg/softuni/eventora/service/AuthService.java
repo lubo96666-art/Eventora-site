@@ -6,7 +6,7 @@ import bg.softuni.eventora.model.*;
 import bg.softuni.eventora.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,11 +19,11 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokens;
     private final PasswordResetTokenRepository resetTokens;
     private final EmailService emailService;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder encoder;
     @Value("${app.base-url}") private String baseUrl;
 
-    public AuthService(UserRepository users, VerificationTokenRepository verificationTokens, PasswordResetTokenRepository resetTokens, EmailService emailService) {
-        this.users = users; this.verificationTokens = verificationTokens; this.resetTokens = resetTokens; this.emailService = emailService;
+    public AuthService(UserRepository users, VerificationTokenRepository verificationTokens, PasswordResetTokenRepository resetTokens, EmailService emailService, PasswordEncoder encoder) {
+        this.users = users; this.verificationTokens = verificationTokens; this.resetTokens = resetTokens; this.emailService = emailService; this.encoder = encoder;
     }
 
     public String register(RegisterDto dto) {
@@ -96,7 +96,7 @@ public class AuthService {
         return String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
     }
 
-    public void login(LoginDto dto, HttpSession session) {
+    public User login(LoginDto dto, HttpSession session) {
         String identifier = dto.getEmail().trim();
         User user = users.findByEmail(identifier)
                 .or(() -> users.findByUsername(identifier))
@@ -106,6 +106,7 @@ public class AuthService {
         session.setAttribute("userId", user.getId());
         session.setAttribute("username", user.getUsername());
         session.setAttribute("role", user.getRole());
+        return user;
     }
 
     public void sendPasswordReset(ForgotPasswordDto dto) {

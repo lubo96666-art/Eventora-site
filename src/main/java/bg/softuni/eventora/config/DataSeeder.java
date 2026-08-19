@@ -3,16 +3,17 @@ package bg.softuni.eventora.config;
 import bg.softuni.eventora.model.User;
 import bg.softuni.eventora.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder encoder;
 
-    public DataSeeder(UserRepository userRepository) {
+    public DataSeeder(UserRepository userRepository, PasswordEncoder encoder) {
         this.userRepository = userRepository;
+        this.encoder = encoder;
     }
 
     @Override
