@@ -1,58 +1,79 @@
 # Eventora
 
-Eventora е уеб приложение за разглеждане на събития и закупуване на билети. Потребителите могат да се регистрират, да добавят събития в любими, да купуват билети и да преглеждат направените поръчки.
+Eventora is an original event-ticketing platform built as two independent Spring Boot applications.
 
-## Основни функционалности
+## Architecture
 
-- регистрация и вход в профил;
-- потвърждение на профил чрез имейл;
-- възстановяване на забравена парола;
-- разглеждане и търсене на събития;
-- добавяне на събития в любими;
-- покупка на билети и преглед на закупените билети;
-- събиране на точки при направена покупка;
-- ограничение до 8 билета за едно събитие;
-- администраторски панел за добавяне, редактиране и изтриване на събития.
+| Application | Port | Database | Purpose |
+| --- | ---: | --- | --- |
+| Eventora main | 8080 | `eventora` / `eventora-db` | MVC UI, users, venues, events and ticket orders |
+| Eventora Reviews | 8081 | `eventora_reviews` / `eventora-reviews-db` | Domain-specific event ratings and visitor reviews REST API |
 
-## Използвани технологии
+The applications use separate databases. The main application consumes the reviews API through Spring Cloud OpenFeign. It invokes `GET /api/reviews/event/{eventId}`, `POST /api/reviews`, `PUT /api/reviews/{id}` and `DELETE /api/reviews/{id}`. Review creation, editing and deletion are initiated from the event details page and produce visible UI feedback.
 
-- Java 17
-- Spring Boot 3.4.0
-- Spring MVC
-- Thymeleaf
-- Spring Data JPA
-- Hibernate
-- H2 / MySQL
-- Maven
-- HTML, CSS и JavaScript
+## Technology stack
 
-## Стартиране на проекта
+- Java 17 and Spring Boot 3.4
+- Spring MVC, Thymeleaf and Bean Validation
+- Spring Security with BCrypt, roles and CSRF protection
+- Spring Data JPA with UUID primary keys
+- Spring Cloud OpenFeign
+- MySQL for production and H2 for zero-configuration local execution
+- Spring Cache and Spring Scheduling
+- JUnit 5, Mockito, MockMvc, integration tests and JaCoCo
+- Maven and Docker Compose
 
-1. Отвори проекта в IntelliJ IDEA чрез файла `pom.xml`.
-2. Изчакай Maven да зареди зависимостите.
-3. Провери дали проектът използва Java 17.
-4. Стартирай `EventoraApplication.java`.
-5. Отвори `http://localhost:8080/visualization`.
+## Domain functionality
 
-По подразбиране приложението използва локална H2 база данни и не е необходимо да се стартира MySQL.
+- Create, edit and delete events as an administrator
+- Purchase up to eight tickets per event with stock validation
+- Cancel a ticket order and restore event capacity
+- Apply promotional codes and redeem loyalty points
+- Create, edit and delete an event review through the reviews microservice
+- View event reviews loaded through the microservice
+- Edit the authenticated user's own profile
+- Change user roles as an administrator
 
-## Тестови профили
+Spring Security defines public pages, authenticated pages and `ADMIN`-only endpoints. Roles are `USER`, `VIP` and `ADMIN`. CSRF remains enabled. Passwords are BCrypt-hashed.
 
-Данните за тестовите профили се намират във файла `TEST_USERS.txt`.
+## Pages
 
-## MySQL
+The main application has 12 complete Thymeleaf pages: home/catalogue, event details, schedule, ticket list, ticket details, administration, event form, user administration, profile, message, error and about. Eleven use backend model data or user state; About is informational.
 
-За стартиране с MySQL може да се използва профилът `mysql`:
+## Scheduling, caching and logging
+
+- A cron job removes expired verification and password-reset tokens every night.
+- A fixed-delay job refreshes event caches every five minutes.
+- Event catalogue and event details use Spring's caching abstraction; mutations evict stale data.
+- Every required state-changing domain functionality logs its outcome with SLF4J.
+
+## Run locally
+
+Start the reviews service first:
 
 ```bash
-docker compose up -d
-./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
+cd eventora-reviews
+../mvnw spring-boot:run
 ```
 
-При нужда настройките за базата могат да се зададат чрез `DB_URL`, `DB_USERNAME` и `DB_PASSWORD`.
+Then start the main application in another terminal:
 
-## Имейл потвърждение
+```bash
+./mvnw spring-boot:run
+```
 
-Приложението използва Spring Mail за потвърждение на регистрация и възстановяване на парола. За реално изпращане на имейли трябва да бъдат зададени `MAIL_USERNAME` и `MAIL_PASSWORD`.
+Open `http://localhost:8080`. The reviews API is available at `http://localhost:8081/api/reviews`.
 
-Използваните външни интеграции са MySQL, Gmail SMTP и Docker Compose.
+Default accounts are listed in `TEST_USERS.txt`. For MySQL, create separate schemas named `eventora` and `eventora_reviews`, then supply datasource environment variables.
+
+## Tests
+
+Run both suites and generate JaCoCo reports:
+
+```bash
+./mvnw clean verify
+cd eventora-reviews
+../mvnw clean verify
+```
+
+Reports are generated under each application's `target/site/jacoco` directory. The suites include unit, JPA integration, full-context integration and MockMvc API tests.
