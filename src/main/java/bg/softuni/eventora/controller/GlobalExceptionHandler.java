@@ -29,6 +29,12 @@ public class GlobalExceptionHandler {
         return errorPage("Заявката не може да бъде изпълнена", exception.getMessage(), 400, model);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public String invalidArgument(IllegalArgumentException exception, Model model, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return errorPage("Невалидни данни", exception.getMessage(), 400, model);
+    }
+
     private String errorPage(String title, String message, int status, Model model) {
         model.addAttribute("errorTitle", title);
         model.addAttribute("errorMessage", message);
