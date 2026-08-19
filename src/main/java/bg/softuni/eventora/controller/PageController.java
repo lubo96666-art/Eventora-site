@@ -3,6 +3,7 @@ package bg.softuni.eventora.controller;
 import bg.softuni.eventora.dto.*;
 import bg.softuni.eventora.service.EventService;
 import bg.softuni.eventora.service.OrderService;
+import bg.softuni.eventora.service.ReviewService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,10 +18,12 @@ import java.util.UUID;
 public class PageController {
     private final EventService eventService;
     private final OrderService orderService;
+    private final ReviewService reviewService;
 
-    public PageController(EventService eventService, OrderService orderService) {
+    public PageController(EventService eventService, OrderService orderService, ReviewService reviewService) {
         this.eventService = eventService;
         this.orderService = orderService;
+        this.reviewService = reviewService;
     }
 
     @GetMapping({"/", "/visualization"})
@@ -31,10 +34,22 @@ public class PageController {
     }
 
     @GetMapping("/events/{id}")
-    public String eventDetails(@PathVariable UUID id, Model model) {
+    public String eventDetails(@PathVariable UUID id, Model model, HttpSession session) {
         model.addAttribute("event", eventService.getById(id));
+        model.addAttribute("reviews", reviewService.forEvent(id));
+        model.addAttribute("currentUserId", session.getAttribute("userId"));
+        model.addAttribute("username", session.getAttribute("username"));
         return "event-details";
     }
+
+    @GetMapping("/schedule")
+    public String schedule(Model model) {
+        model.addAttribute("events", eventService.allEvents());
+        return "schedule";
+    }
+
+    @GetMapping("/about")
+    public String about() { return "about"; }
 
     public void addVisualizationModel(Model model, HttpSession session, String authMode) {
         model.addAttribute("events", eventService.allEvents());
