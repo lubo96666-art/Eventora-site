@@ -126,6 +126,7 @@
             <a href="#events">Събития</a>
             <a href="#favorites" onclick="showFavoritesFromMenu(event)">Любими <span class="nav-badge" id="favoriteMenuCount">0</span></a>
             <a th:if="${username != null}" href="/my-tickets">Билети <span class="nav-badge" th:text="${boughtTicketsCount}">0</span></a>
+            <a th:if="${username != null}" th:href="@{/profile}">Моят профил</a>
             <a th:if="${username != null}" href="#points" onclick="showPointsPanel(event)">Точки <span class="nav-badge" id="pointsMenuCount">0</span></a>
             <a href="#cart" onclick="scrollToCart();return false;">Кошница <span class="nav-badge cart-count">0</span></a>
             <a th:if="${isAdmin}" href="/admin/events">Админ</a>
@@ -140,6 +141,7 @@
             <th:block th:if="${username != null}">
                 <div class="user-menu">
                     <span class="hello">Здравей, <span th:text="${username}">user</span></span><span class="account-chip">🎟️ <span th:text="${boughtTicketsCount}">0</span></span><span class="points-chip">⭐ <span id="headerPoints">0</span></span>
+                    <a class="btn outline" th:href="@{/profile}">Профил</a>
                     <form method="post" th:action="@{/logout}"><button class="btn danger" type="submit">Изход</button></form>
                 </div>
             </th:block>
