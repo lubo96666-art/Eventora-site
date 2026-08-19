@@ -100,11 +100,31 @@
         .theme-toggle{flex:0 0 auto}
         .auth .btn{padding:11px 16px}
 
+        @media(max-width:1850px){
+            .nav{
+                grid-template-columns:auto minmax(0,1fr);
+                grid-template-areas:"logo account" "menu menu";
+                row-gap:8px;
+                padding-top:10px;
+                padding-bottom:10px;
+            }
+            .logo{grid-area:logo;align-self:center}
+            .auth{grid-area:account;justify-self:end;justify-content:flex-end}
+            .links{
+                grid-area:menu;
+                justify-content:center;
+                width:100%;
+                overflow-x:auto;
+                padding:2px 0 4px;
+                scrollbar-width:thin;
+            }
+        }
+
         @media(max-width:1350px){
-            .nav{grid-template-columns:1fr;gap:10px;align-items:start}
+            .nav{grid-template-columns:1fr;grid-template-areas:"logo" "account" "menu";gap:10px;align-items:start}
             .logo{justify-self:start}
             .links{justify-content:flex-start;overflow-x:auto;width:100%;padding-bottom:4px;scrollbar-width:thin}
-            .auth{justify-content:flex-start;width:100%}
+            .auth{justify-self:start;justify-content:flex-start;width:100%}
             .user-menu{width:auto}
         }
         @media(max-width:720px){
